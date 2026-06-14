@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,8 +12,10 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { SkipThrottle } from "@nestjs/throttler";
+import { User } from "@prisma/client";
 import * as contentDisposition from "content-disposition";
 import { Response } from "express";
+import { GetUser } from "src/auth/decorator/getUser.decorator";
 import { CreateShareGuard } from "src/share/guard/createShare.guard";
 import { StrictShareOwnerGuard } from "src/share/guard/strictShareOwner.guard";
 import { IdValidation } from "src/share/guard/shareIdValidation.guard";
@@ -21,6 +24,7 @@ import { FileSecurityGuard } from "./guard/fileSecurity.guard";
 import * as mime from "mime-types";
 
 const VALID_ID_REGEX = /^[a-zA-Z0-9-]*={0,2}$/;
+const VALID_DIRECT_DOWNLOAD_TOKEN_REGEX = /^[a-zA-Z0-9_-]+$/;
 
 function getValidRecipientId(recipientId?: string): string | undefined {
   if (!recipientId) return undefined;
@@ -111,6 +115,56 @@ export class FileController {
         getValidRecipientId(recipientId),
       );
     }
+
+    return new StreamableFile(file.file);
+  }
+
+  @Post(":fileId/direct-link")
+  @UseGuards(IdValidation, StrictShareOwnerGuard)
+  async createDirectDownloadLink(
+    @Param("shareId") shareId: string,
+    @Param("fileId") fileId: string,
+    @GetUser() user: User,
+  ) {
+    return this.fileService.createDirectDownloadLink(shareId, fileId, user);
+  }
+
+  @Delete(":fileId/direct-link")
+  @UseGuards(IdValidation, StrictShareOwnerGuard)
+  async revokeDirectDownloadLink(
+    @Param("shareId") shareId: string,
+    @Param("fileId") fileId: string,
+    @GetUser() user: User,
+  ) {
+    await this.fileService.revokeDirectDownloadLink(shareId, fileId, user);
+  }
+
+  @Get(":fileId/direct/:token")
+  async getDirectDownload(
+    @Res({ passthrough: true }) res: Response,
+    @Param("shareId") shareId: string,
+    @Param("fileId") fileId: string,
+    @Param("token") token: string,
+  ) {
+    if (!VALID_DIRECT_DOWNLOAD_TOKEN_REGEX.test(token)) {
+      throw new BadRequestException("Invalid direct download token format");
+    }
+
+    const file = await this.fileService.getDirectDownload(
+      shareId,
+      fileId,
+      token,
+    );
+
+    res.set({
+      "Content-Type":
+        mime?.lookup?.(file.metaData.name) || "application/octet-stream",
+      "Content-Length": file.metaData.size,
+      "Content-Security-Policy": "sandbox",
+      "Content-Disposition": contentDisposition(file.metaData.name),
+      "Cache-Control": "no-store",
+      Pragma: "no-cache",
+    });
 
     return new StreamableFile(file.file);
   }

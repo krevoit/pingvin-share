@@ -134,6 +134,22 @@ model File {
 
   shareId String
   share   Share  @relation(fields: [shareId], references: [id], onDelete: Cascade)
+
+  directDownloadLink DirectDownloadLink?
+}
+
+model DirectDownloadLink {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  lastUsedAt DateTime?
+
+  fileId String @unique
+  file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
 }
 
 model ShareSecurity {

@@ -149,6 +149,15 @@ const Share = ({ shareId }: { shareId: string }) => {
     getFiles();
   }, []);
 
+  useEffect(() => {
+    if (!isOwner) return;
+
+    shareService
+      .getFromOwner(shareId)
+      .then((ownerShare) => setShare(ownerShare))
+      .catch(() => undefined);
+  }, [isOwner]);
+
   return (
     <>
       <Meta
@@ -213,6 +222,7 @@ const Share = ({ shareId }: { shareId: string }) => {
         share={share!}
         isLoading={!share}
         recipientId={recipientId}
+        isOwner={isOwner}
       />
     </>
   );

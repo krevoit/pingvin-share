@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from "@nestjs/common";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Cache } from "cache-manager";
 import { LocalFileService } from "./local.service";
@@ -7,9 +13,14 @@ import { ConfigService } from "src/config/config.service";
 import { Readable } from "stream";
 import { PrismaService } from "../prisma/prisma.service";
 import { EmailService } from "src/email/email.service";
+import * as crypto from "crypto";
+import * as moment from "moment";
+import { I18nService } from "nestjs-i18n";
+import { Share, User } from "@prisma/client";
 
 const UPDATED_AT_THROTTLE_MS = 5 * 60 * 1000;
 const DOWNLOAD_NOTIFICATION_COOLDOWN_MS = 15 * 60 * 1000;
+const DIRECT_DOWNLOAD_LINK_EXPIRATION_MS = 60 * 60 * 1000;
 
 @Injectable()
 export class FileService {
@@ -20,6 +31,7 @@ export class FileService {
     private configService: ConfigService,
     private emailService: EmailService,
     @Inject(CACHE_MANAGER) private cache: Cache,
+    private readonly i18n: I18nService,
   ) {}
   private readonly logger = new Logger(FileService.name);
 
@@ -74,6 +86,136 @@ export class FileService {
     });
     const storageService = this.getStorageService(share.storageProvider);
     return storageService.get(shareId, fileId);
+  }
+
+  async createDirectDownloadLink(
+    shareId: string,
+    fileId: string,
+    user?: User,
+  ) {
+    const file = await this.getOwnerFile(shareId, fileId, user);
+    const token = this.generateDirectDownloadToken();
+    const tokenHash = this.hashDirectDownloadToken(token);
+    const expiresAt = new Date(Date.now() + DIRECT_DOWNLOAD_LINK_EXPIRATION_MS);
+
+    const link = await this.prisma.directDownloadLink.upsert({
+      where: { fileId: file.id },
+      create: {
+        file: { connect: { id: file.id } },
+        tokenHash,
+        expiresAt,
+      },
+      update: {
+        tokenHash,
+        expiresAt,
+        revokedAt: null,
+        lastUsedAt: null,
+      },
+    });
+
+    return {
+      token,
+      expiresAt: link.expiresAt,
+      revokedAt: link.revokedAt,
+      lastUsedAt: link.lastUsedAt,
+    };
+  }
+
+  async revokeDirectDownloadLink(
+    shareId: string,
+    fileId: string,
+    user?: User,
+  ) {
+    const file = await this.getOwnerFile(shareId, fileId, user);
+
+    await this.prisma.directDownloadLink.updateMany({
+      where: { fileId: file.id, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
+  async getDirectDownload(shareId: string, fileId: string, token: string) {
+    const directLink = await this.prisma.directDownloadLink.findUnique({
+      where: { tokenHash: this.hashDirectDownloadToken(token) },
+      include: {
+        file: {
+          include: {
+            share: {
+              include: { security: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (
+      !directLink ||
+      directLink.fileId !== fileId ||
+      directLink.file.shareId !== shareId ||
+      directLink.revokedAt ||
+      moment().isAfter(directLink.expiresAt)
+    ) {
+      throw new NotFoundException(this.i18n.t("file.notFound"));
+    }
+
+    await this.assertDirectDownloadShareAllowed(directLink.file.share);
+
+    await this.prisma.directDownloadLink.update({
+      where: { id: directLink.id },
+      data: { lastUsedAt: new Date() },
+    });
+
+    return this.get(shareId, fileId);
+  }
+
+  private async getOwnerFile(shareId: string, fileId: string, user?: User) {
+    const file = await this.prisma.file.findFirst({
+      where: { id: fileId, shareId },
+      include: { share: true },
+    });
+
+    if (!file) throw new NotFoundException(this.i18n.t("file.notFound"));
+
+    if (!user || file.share.creatorId !== user.id) {
+      throw new ForbiddenException(this.i18n.t("share.tokenRequired"));
+    }
+
+    return file;
+  }
+
+  private async assertDirectDownloadShareAllowed(
+    share: Share & { security?: { maxViews?: number | null } | null },
+  ) {
+    if (
+      !share.uploadLocked ||
+      share.removedReason ||
+      (moment().isAfter(share.expiration) &&
+        !moment(share.expiration).isSame(0))
+    ) {
+      throw new NotFoundException(
+        share.removedReason || this.i18n.t("share.notFound"),
+      );
+    }
+
+    if (share.security?.maxViews && share.security.maxViews <= share.views) {
+      throw new ForbiddenException(
+        this.i18n.t("share.maxViewsExceeded"),
+        "share_max_views_exceeded",
+      );
+    }
+
+    await this.prisma.share.update({
+      where: { id: share.id },
+      data: { views: share.views + 1 },
+    });
+  }
+
+  private generateDirectDownloadToken() {
+    return crypto.randomBytes(36).toString("base64url");
+  }
+
+  private hashDirectDownloadToken(token: string) {
+    return crypto.createHash("sha256").update(token).digest("hex");
   }
 
   async remove(shareId: string, fileId: string) {

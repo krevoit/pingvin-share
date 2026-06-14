@@ -10,7 +10,7 @@ import {
 import { useClipboard } from "@mantine/hooks";
 import { useModals } from "@mantine/modals";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { TbDownload, TbEye, TbLink, TbClipboard } from "react-icons/tb";
+import { TbDownload, TbEye, TbLink, TbClipboard, TbTrash } from "react-icons/tb";
 import { FormattedMessage } from "react-intl";
 import useConfig from "../../hooks/config.hook";
 import useTranslate from "../../hooks/useTranslate.hook";
@@ -30,12 +30,14 @@ const FileList = ({
   share,
   isLoading,
   recipientId,
+  isOwner,
 }: {
   files?: FileMetaData[];
   setShare: Dispatch<SetStateAction<Share | undefined>>;
   share: Share;
   isLoading: boolean;
   recipientId?: string;
+  isOwner?: boolean;
 }) => {
   const clipboard = useClipboard();
   const config = useConfig();
@@ -90,6 +92,81 @@ const FileList = ({
       });
     }
   };
+
+  const copyDirectDownloadLink = async (file: FileMetaData) => {
+    try {
+      const directDownloadLink = await shareService.createDirectDownloadLink(
+        share.id,
+        file.id,
+      );
+      const origin =
+        config.get("general.appUrl") !== config.get("general.appUrl", true)
+          ? config.get("general.appUrl")
+          : window.location.origin;
+      const link = `${origin}/api/shares/${share.id}/files/${file.id}/direct/${directDownloadLink.token}`;
+
+      setShare({
+        ...share,
+        files: share.files.map((shareFile: FileMetaData) =>
+          shareFile.id === file.id
+            ? {
+                ...shareFile,
+                directDownloadLink: {
+                  expiresAt: directDownloadLink.expiresAt,
+                  revokedAt: directDownloadLink.revokedAt,
+                  lastUsedAt: directDownloadLink.lastUsedAt,
+                },
+              }
+            : shareFile,
+        ),
+      });
+
+      if (window.isSecureContext) {
+        clipboard.copy(link);
+        toast.success(t("common.notify.copied-link"));
+      } else {
+        modals.openModal({
+          title: "Direct download link",
+          children: (
+            <Stack align="stretch">
+              <TextInput variant="filled" value={link} />
+            </Stack>
+          ),
+        });
+      }
+    } catch (e) {
+      toast.axiosError(e);
+    }
+  };
+
+  const revokeDirectDownloadLink = async (file: FileMetaData) => {
+    try {
+      await shareService.revokeDirectDownloadLink(share.id, file.id);
+      setShare({
+        ...share,
+        files: share.files.map((shareFile: FileMetaData) =>
+          shareFile.id === file.id
+            ? {
+                ...shareFile,
+                directDownloadLink: {
+                  ...shareFile.directDownloadLink,
+                  expiresAt:
+                    shareFile.directDownloadLink?.expiresAt ?? new Date(),
+                  revokedAt: new Date(),
+                },
+              }
+            : shareFile,
+        ),
+      });
+    } catch (e) {
+      toast.axiosError(e);
+    }
+  };
+
+  const hasActiveDirectDownloadLink = (file: FileMetaData) =>
+    !!file.directDownloadLink &&
+    !file.directDownloadLink.revokedAt &&
+    new Date(file.directDownloadLink.expiresAt).getTime() > Date.now();
 
   useEffect(sortFiles, [sort]);
 
@@ -174,6 +251,30 @@ const FileList = ({
                             onClick={() => copyFileLink(file)}
                           >
                             <TbLink />
+                          </ActionIcon>
+                        </HoverTip>
+                      )}
+                      {isOwner && (
+                        <HoverTip label="Copy direct download link">
+                          <ActionIcon
+                            color="indigo"
+                            variant="light"
+                            size={25}
+                            onClick={() => copyDirectDownloadLink(file)}
+                          >
+                            <TbLink />
+                          </ActionIcon>
+                        </HoverTip>
+                      )}
+                      {isOwner && hasActiveDirectDownloadLink(file) && (
+                        <HoverTip label="Stop direct download link">
+                          <ActionIcon
+                            color="red"
+                            variant="light"
+                            size={25}
+                            onClick={() => revokeDirectDownloadLink(file)}
+                          >
+                            <TbTrash />
                           </ActionIcon>
                         </HoverTip>
                       )}
