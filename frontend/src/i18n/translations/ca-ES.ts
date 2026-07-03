@@ -42,7 +42,6 @@ export default {
   "signIn.oauth.microsoft": "Microsoft",
   "signIn.oauth.discord": "Discord",
   "signIn.oauth.oidc": "OpenID",
-
   // END /auth/signin
 
   // /auth/signup
@@ -214,6 +213,8 @@ export default {
   "admin.users.edit.update.title": "Editar usuari: {username}",
   "admin.users.edit.update.admin-privileges": "Privilegis d'administrador",
   "admin.users.edit.update.email-verified": "Email verified",
+  "admin.users.edit.update.custom-share-size-limit": "Custom share size limit",
+  "admin.users.edit.update.custom-share-size-limit.description": "Override the global upload limit for this user",
   "admin.users.edit.update.change-password.title": "Canviar contrasenya",
   "admin.users.edit.update.change-password.field": "Nova contrasenya",
   "admin.users.edit.update.change-password.button": "Desar la nova contrasenya",
@@ -227,6 +228,8 @@ export default {
   "admin.users.modal.create.password": "Contrasenya",
   "admin.users.modal.create.manual-password": "Configurar contrasenya manualment",
   "admin.users.modal.create.manual-password.description": "Si no està marcat, l'usuari rebrà un correu amb un enllaç per configurar la seva contrasenya.",
+  "admin.users.modal.create.custom-share-size-limit": "Custom share size limit",
+  "admin.users.modal.create.custom-share-size-limit.description": "Override the global upload limit for this user",
   "admin.users.modal.create.admin": "Privilegis d'administrador",
   "admin.users.modal.create.admin.description": "Si està marcat, l'usuari podrà accedir al panell d'administració.",
   // END /admin/users
@@ -397,6 +400,8 @@ export default {
   "admin.config.cache.test-redis.modal.save.title": "Desar la configuració",
   "admin.config.cache.test-redis.modal.save.description": "Per continuar, primer heu de desar la configuració. Voleu desar la configuració i provar la connexió a Redis?",
   "admin.config.cache.test-redis.modal.save.confirm": "Desar i provar",
+  "admin.config.email.send-html-emails": "Enable HTML email compatibility",
+  "admin.config.email.send-html-emails.description": "If enabled, emails will be sent in HTML format. Ensure email templates are updated to use HTML.",
   "admin.config.email.enable-share-email-recipients": "Activar la compartició de destinataris per correu",
   "admin.config.email.enable-share-email-recipients.description": "Si s'ha de permetre la compartició per correu amb els destinataris. Això només es pot activar si l'SMTP està activat.",
   "admin.config.email.share-recipients-subject": "Assumpte dels destinataris de la compartició",
@@ -446,6 +451,8 @@ export default {
   "admin.config.share.auto-open-share-modal": "Obrir automàticament el diàleg de creació",
   "admin.config.share.auto-open-share-modal.description": "El diàleg de creació de compartició apareix automàticament quan un usuari selecciona fitxers, eliminant la necessitat de clicar el botó manualment.",
   "admin.config.share.allow-admin-access-all-shares": "Permetre l'accés de l'administrador a totes les comparticions",
+  "admin.config.share.reverse-share-simple-only": "Force reverse share simple mode",
+  "admin.config.share.reverse-share-simple-only.description": "Force reverse shares to be created in simple mode. If disabled, the creator of the reverse share can choose between simple and advanced mode.",
   "admin.config.share.allow-admin-access-all-shares.description": "Permetre aos administradors accedir a totes les comparticions, fins i tot si estan protegides amb contrasenya, caducades o suprimides.",
   "admin.config.share.file-retention-period": "Període de retenció de fitxers",
   "admin.config.share.file-retention-period.description": "How long files are kept after a share expires or gets deleted. Only useful if the 'Allow admin access to all shares' is also enabled. Set to -1 to keep files forever.",
@@ -599,7 +606,6 @@ export default {
   "error.param.provider_microsoft": "Microsoft",
   "error.param.provider_discord": "Discord",
   "error.param.provider_oidc": "OpenID Connect",
-
   // Common translations
   "common.button.info": "Informació",
   "common.button.undo": "Desfer",

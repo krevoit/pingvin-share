@@ -268,6 +268,9 @@ export default {
   "admin.users.edit.update.title": "Edit user: {username}",
   "admin.users.edit.update.admin-privileges": "Admin privileges",
   "admin.users.edit.update.email-verified": "Email verified",
+  "admin.users.edit.update.custom-share-size-limit": "Custom share size limit",
+  "admin.users.edit.update.custom-share-size-limit.description":
+    "Override the global upload limit for this user",
   "admin.users.edit.update.change-password.title": "Change password",
   "admin.users.edit.update.change-password.field": "New password",
   "admin.users.edit.update.change-password.button": "Save new password",
@@ -286,6 +289,9 @@ export default {
   "admin.users.modal.create.manual-password": "Set password manually",
   "admin.users.modal.create.manual-password.description":
     "If not checked, the user will receive an email with a link to set their password.",
+  "admin.users.modal.create.custom-share-size-limit": "Custom share size limit",
+  "admin.users.modal.create.custom-share-size-limit.description":
+    "Override the global upload limit for this user",
   "admin.users.modal.create.admin": "Admin privileges",
   "admin.users.modal.create.admin.description":
     "If checked, the user will be able to access the admin panel.",
@@ -521,6 +527,8 @@ export default {
   "admin.config.cache.test-redis.modal.save.description":
     "To continue you need to save the configuration first. Do you want to save the configuration and test the Redis connection?",
   "admin.config.cache.test-redis.modal.save.confirm": "Save and test",
+  "admin.config.email.send-html-emails": "Enable HTML email compatibility",
+  "admin.config.email.send-html-emails.description": "If enabled, emails will be sent in HTML format. Ensure email templates are updated to use HTML.",
   "admin.config.email.enable-share-email-recipients":
     "Enable email recipient sharing",
   "admin.config.email.enable-share-email-recipients.description":
@@ -599,6 +607,9 @@ export default {
     "The share creation modal automatically appears when a user selects files, eliminating the need to manually click the button.",
   "admin.config.share.allow-admin-access-all-shares":
     "Allow admin access to all shares",
+  "admin.config.share.reverse-share-simple-only": "Force reverse share simple mode",
+  "admin.config.share.reverse-share-simple-only.description":
+    "Force reverse shares to be created in simple mode. If disabled, the creator of the reverse share can choose between simple and advanced mode.",
   "admin.config.share.allow-admin-access-all-shares.description":
     "Allow administrators to access all shares, even if they are password protected, expired or deleted.",
   "admin.config.share.file-retention-period": "File retention period",

@@ -112,6 +112,11 @@ export const configVariables = {
       defaultValue: "false",
       secret: false,
     },
+    reverseShareSimpleOnly: {
+      type: "boolean",
+      defaultValue: "false",
+      secret: false,
+    },
     allowAdminAccessAllShares: {
       type: "boolean",
       defaultValue: "false",
@@ -143,6 +148,10 @@ export const configVariables = {
     },
   },
   email: {
+    sendHtmlEmails: {
+      type: "boolean",
+      defaultValue: "false",
+    },
     enableShareEmailRecipients: {
       type: "boolean",
       defaultValue: "false",
@@ -546,7 +555,7 @@ async function migrateConfigVariables() {
   for (const existingConfigVariable of existingConfigVariables) {
     const configVariable =
       configVariables[existingConfigVariable.category]?.[
-        existingConfigVariable.name
+      existingConfigVariable.name
       ];
 
     // Delete the config variable if it doesn't exist in the seed
