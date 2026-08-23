@@ -9,8 +9,11 @@
   "anonymousNoUpdate": "Anonyma delningar kan inte uppdateras",
   "invalidExpiration": "Ogiltigt utgångsdatum",
   "maxExpirationExceeded": "Utgångsdatumet överskrider det maximala utgångsdatumet",
+  "storageQuotaExceeded": "Användarens lagringskvot har överskridits med {exceededSize}",
+  "reverseShareQuotaExceeded": "Ägaren av den omvända delningens lagringskvot har överskridits med {exceededSize}",
   "wrongPassword": "Fel lösenord",
   "tokenRequired": "Delningstoken krävs",
   "privateShare": "Endast skaparen av den omvända delningen har tillgång till denna delning",
-  "maxViewsExceeded": "Maximalt antal visningar överskridet"
+  "maxViewsExceeded": "Maximalt antal visningar överskridet",
+  "restrictedToRecipients": "Denna delning är begränsad till specifika mottagare. Logga in för att komma åt den."
 }

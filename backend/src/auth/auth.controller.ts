@@ -44,7 +44,7 @@ export class AuthController {
   @Throttle({
     default: {
       limit: 20,
-      ttl: 5 * 60,
+      ttl: 5 * 60 * 1000,
     },
   })
   async signUp(
@@ -52,7 +52,7 @@ export class AuthController {
     @Req() { ip }: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    if (!this.config.get("share.allowRegistration"))
+    if (!this.config.get("security.allowRegistration"))
       throw new ForbiddenException(this.i18n.t("auth.registrationNotAllowed"));
 
     const result = await this.authService.signUp(dto, ip);
@@ -70,7 +70,7 @@ export class AuthController {
   @Throttle({
     default: {
       limit: 20,
-      ttl: 5 * 60,
+      ttl: 5 * 60 * 1000,
     },
   })
   @HttpCode(200)
@@ -96,7 +96,7 @@ export class AuthController {
   @Throttle({
     default: {
       limit: 20,
-      ttl: 5 * 60,
+      ttl: 5 * 60 * 1000,
     },
   })
   @HttpCode(200)
@@ -119,7 +119,7 @@ export class AuthController {
   @Throttle({
     default: {
       limit: 20,
-      ttl: 5 * 60,
+      ttl: 5 * 60 * 1000,
     },
   })
   @HttpCode(202)
@@ -131,7 +131,7 @@ export class AuthController {
   @Throttle({
     default: {
       limit: 20,
-      ttl: 5 * 60,
+      ttl: 5 * 60 * 1000,
     },
   })
   @HttpCode(204)
@@ -143,7 +143,7 @@ export class AuthController {
   @Throttle({
     default: {
       limit: 20,
-      ttl: 5 * 60,
+      ttl: 5 * 60 * 1000,
     },
   })
   @HttpCode(204)
@@ -155,7 +155,7 @@ export class AuthController {
   @Throttle({
     default: {
       limit: 20,
-      ttl: 5 * 60,
+      ttl: 5 * 60 * 1000,
     },
   })
   @HttpCode(204)
@@ -204,7 +204,7 @@ export class AuthController {
       request.cookies.access_token,
     );
 
-    const isSecure = this.config.get("general.secureCookies");
+    const isSecure = this.config.get("security.secureCookies");
     response.cookie("access_token", "", {
       maxAge: -1,
       secure: isSecure,

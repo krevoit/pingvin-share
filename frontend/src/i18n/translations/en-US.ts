@@ -7,6 +7,7 @@ export default {
 
   "navbar.links.shares": "My shares",
   "navbar.links.reverse": "Reverse shares",
+  "navbar.links.received": "Received shares",
 
   "navbar.avatar.account": "My account",
   "navbar.avatar.admin": "Administration",
@@ -65,13 +66,15 @@ export default {
 
   // /auth/verify
   "verify.title": "Verify Account",
-  "verify.success": "Your account has been successfully verified! You can now sign in.",
+  "verify.success":
+    "Your account has been successfully verified! You can now sign in.",
   "verify.error": "The verification link is invalid or has expired.",
   "verify.button.signin": "Go to Sign In",
   "verify.info.title": "Account Verification",
   "verify.info.description":
     "Email verification is enabled. We've sent a verification link to your email address. Please click the link to activate your account.",
-  "verify.info.note": "If you don't receive the email within a few minutes, please check your spam folder.",
+  "verify.info.note":
+    "If you don't receive the email within a few minutes, please check your spam folder.",
   "verify.info.resend.button": "Resend verification email",
   "verify.info.resend.success": "Verification email resent successfully.",
   "verify.info.resend.error": "Failed to resend verification email.",
@@ -174,6 +177,10 @@ export default {
   "account.shares.table.createdAt": "Created on",
   "account.shares.table.size": "Size",
   "account.shares.table.password-protected": "Password protected",
+  "account.shares.table.recipients": "Recipients",
+  "account.shares.table.restricted-to-recipients":
+    "Restricted to recipients only",
+  "account.shares.table.shared-with-recipients": "Shared with recipients",
   "account.shares.table.visitor-count": "{count} of {max}",
   "account.shares.table.expiry-never": "Never",
 
@@ -188,6 +195,15 @@ export default {
     "Do you really want to delete this share?",
 
   // END /account/shares
+
+  // /account/received
+  "account.received-shares.title": "Received shares",
+  "account.received-shares.title.empty": "No shares received yet",
+  "account.received-shares.description.empty":
+    "Shares sent to your email address will appear here.",
+  "account.received-shares.table.from": "From",
+  "account.received-shares.button.open": "Open",
+  // END /account/received
 
   // /account/reverseShares
   "account.reverseShares.title": "Reverse shares",
@@ -264,6 +280,8 @@ export default {
   "admin.users.table.username": "Username",
   "admin.users.table.email": "Email",
   "admin.users.table.admin": "Admin",
+  "admin.users.table.storageQuota": "Storage quota",
+  "admin.users.table.maxShareSize": "Max share size",
 
   "admin.users.edit.update.title": "Edit user: {username}",
   "admin.users.edit.update.admin-privileges": "Admin privileges",
@@ -271,6 +289,9 @@ export default {
   "admin.users.edit.update.custom-share-size-limit": "Custom share size limit",
   "admin.users.edit.update.custom-share-size-limit.description":
     "Override the global upload limit for this user",
+  "admin.users.edit.update.custom-storage-quota-limit": "Custom storage quota",
+  "admin.users.edit.update.custom-storage-quota-limit.description":
+    "Limit the user's total storage usage across active shares",
   "admin.users.edit.update.change-password.title": "Change password",
   "admin.users.edit.update.change-password.field": "New password",
   "admin.users.edit.update.change-password.button": "Save new password",
@@ -292,6 +313,9 @@ export default {
   "admin.users.modal.create.custom-share-size-limit": "Custom share size limit",
   "admin.users.modal.create.custom-share-size-limit.description":
     "Override the global upload limit for this user",
+  "admin.users.modal.create.custom-storage-quota-limit": "Custom storage quota",
+  "admin.users.modal.create.custom-storage-quota-limit.description":
+    "Limit the user's total storage usage across active shares",
   "admin.users.modal.create.admin": "Admin privileges",
   "admin.users.modal.create.admin.description":
     "If checked, the user will be able to access the admin panel.",
@@ -339,12 +363,17 @@ export default {
   // FileList.tsx
   "upload.filelist.name": "Name",
   "upload.filelist.size": "Size",
+  "upload.filelist.estimating": "Estimating...",
+  "upload.filelist.remaining": "{time} remaining",
 
   // showCreateUploadModal.tsx
   "upload.modal.title": "Create Share",
   "upload.modal.link.error.invalid":
     "Can only contain letters, numbers, underscores, and hyphens",
   "upload.modal.link.error.taken": "This link is already in use",
+  "upload.modal.link.error.s3-session-not-found": "S3 upload session not found",
+  "upload.modal.link.error.s3-etag-missing":
+    "Missing ETag header in S3 response. Ensure CORS exposes the ETag header.",
   "upload.modal.not-signed-in": "You're not signed in",
   "upload.modal.not-signed-in-description":
     "You will be unable to delete your share manually and view the visitor count.",
@@ -377,6 +406,8 @@ export default {
   "upload.modal.accordion.email.title": "Email recipients",
   "upload.modal.accordion.email.placeholder": "Enter email recipients",
   "upload.modal.accordion.email.invalid-email": "Invalid email address",
+  "upload.modal.accordion.email.restrict-to-recipients":
+    "Restrict access to these recipients only (they must sign in to access it)",
 
   "upload.modal.accordion.security.title": "Security options",
   "upload.modal.accordion.security.password.label": "Password protection",
@@ -410,6 +441,10 @@ export default {
   "share.error.access-denied.title": "Private share",
   "share.error.access-denied.description":
     "The current account does not have permission to access this share",
+  "share.error.restricted.title": "Restricted share",
+  "share.error.restricted.description":
+    "This share is restricted to specific recipients. Please log in to access it.",
+  "share.error.restricted.button": "Log in",
 
   "share.modal.password.title": "Password required",
   "share.modal.password.description":
@@ -430,6 +465,7 @@ export default {
   "share.table.name": "Name",
   "share.table.size": "Size",
 
+  "share.modal.file-preview.original_file": "View original file",
   "share.modal.file-preview.error.not-supported.title": "Preview not supported",
   "share.modal.file-preview.error.not-supported.description":
     "Previews are not supported for this type of files. Please download the file to view it.",
@@ -459,6 +495,7 @@ export default {
   "admin.config.title": "Configuration",
   "admin.config.category.general": "General",
   "admin.config.category.appearance": "Appearance",
+  "admin.config.category.security": "Security & Access",
   "admin.config.category.share": "Share",
   "admin.config.category.cache": "Cache",
   "admin.config.category.email": "Email",
@@ -488,25 +525,52 @@ export default {
   "admin.config.appearance.custom-css": "Custom CSS",
   "admin.config.appearance.custom-css.description":
     "Global CSS applied to the frontend. Use carefully, as invalid CSS may affect the UI.",
+  "admin.config.appearance.upload-progress-style": "Upload progress style",
+  "admin.config.appearance.upload-progress-style.description":
+    "Choose how upload progress is displayed in the file list.",
+  "admin.config.appearance.upload-progress-style.circle": "Circle indicator",
+  "admin.config.appearance.upload-progress-style.circle-percentage":
+    "Circle with percentage",
+  "admin.config.appearance.upload-progress-style.percentage-time":
+    "Percentage and time remaining",
   "admin.config.general.app-url": "App URL",
   "admin.config.general.app-url.description":
     "On which URL Pingvin Share is available",
-  "admin.config.general.secure-cookies": "Secure cookies",
-  "admin.config.general.secure-cookies.description":
+  "admin.config.security.secure-cookies": "Secure cookies",
+  "admin.config.security.secure-cookies.description":
     "Whether to set the secure flag on cookies. If enabled, the site will not function when accessed over HTTP.",
   "admin.config.general.show-home-page": "Show home page",
   "admin.config.general.show-home-page.description":
     "Whether to show the home page",
-  "admin.config.general.session-duration": "Session Duration",
-  "admin.config.general.session-duration.description":
+  "admin.config.security.session-duration": "Session Duration",
+  "admin.config.security.session-duration.description":
     "Time after which a user must log in again (default: 3 months).",
-  "admin.config.general.logo": "Logo",
-  "admin.config.general.logo.description":
+  "admin.config.appearance.logo": "Logo",
+  "admin.config.appearance.logo.description":
     "Change your logo by uploading a new image. The image must be a PNG and should have the format 1:1.",
-  "admin.config.general.logo-dark": "Dark mode logo",
-  "admin.config.general.logo-dark.description":
+  "admin.config.appearance.logo-dark": "Dark mode logo",
+  "admin.config.appearance.logo-dark.description":
     "Upload a separate logo for dark mode. The image must be a PNG and should have the format 1:1.",
-  "admin.config.general.logo.placeholder": "Pick image",
+  "admin.config.appearance.logo.placeholder": "Pick image",
+  "admin.config.security.custom-password-policy": "Custom password policy",
+  "admin.config.security.custom-password-policy.description":
+    "Whether to enable customisation of the password policy. If disabled, the default password policy of an 8 character minimum is used.",
+  "admin.config.security.min-length": "Minimum length",
+  "admin.config.security.min-length.description":
+    "Minimum number of characters required for a password.",
+  "admin.config.security.require-uppercase": "Require uppercase",
+  "admin.config.security.require-uppercase.description":
+    "Whether to require at least one uppercase letter in the password.",
+  "admin.config.security.require-lowercase": "Require lowercase",
+  "admin.config.security.require-lowercase.description":
+    "Whether to require at least one lowercase letter in the password.",
+  "admin.config.security.require-number": "Require number",
+  "admin.config.security.require-number.description":
+    "Whether to require at least one number in the password.",
+  "admin.config.security.require-special-character":
+    "Require special character",
+  "admin.config.security.require-special-character.description":
+    "Whether to require at least one special character in the password.",
   "admin.config.cache.ttl": "TTL",
   "admin.config.cache.ttl.description":
     "Time in second to keep information inside the cache.",
@@ -532,10 +596,11 @@ export default {
     "To continue you need to save the configuration first. Do you want to save the configuration and test the Redis connection?",
   "admin.config.cache.test-redis.modal.save.confirm": "Save and test",
   "admin.config.email.send-html-emails": "Enable HTML email compatibility",
-  "admin.config.email.send-html-emails.description": "If enabled, emails will be sent in HTML format. Ensure email templates are updated to use HTML.",
-  "admin.config.email.enable-share-email-recipients":
+  "admin.config.email.send-html-emails.description":
+    "If enabled, emails will be sent in HTML format. Ensure email templates are updated to use HTML.",
+  "admin.config.share.enable-share-email-recipients":
     "Enable email recipient sharing",
-  "admin.config.email.enable-share-email-recipients.description":
+  "admin.config.share.enable-share-email-recipients.description":
     "Whether to allow email sharing with recipients. This can only be enabled if SMTP is activated.",
   "admin.config.email.share-recipients-subject": "Share recipients subject",
   "admin.config.email.share-recipients-subject.description":
@@ -561,9 +626,13 @@ export default {
   "admin.config.email.invite-message": "Invite message",
   "admin.config.email.invite-message.description":
     "Message which gets sent when an admin invites a user. {url} will be replaced with the invite URL, {email} with the email and {password} with the users password.",
-  "admin.config.email.enable-share-download-notifications":
+  "admin.config.email.share-recipients-reply-to-creator":
+    "Set Reply-To to creator's email",
+  "admin.config.email.share-recipients-reply-to-creator.description":
+    "Whether to set the Reply-To header to the email address of the user who created the share.",
+  "admin.config.share.enable-share-download-notifications":
     "Enable download notifications",
-  "admin.config.email.enable-share-download-notifications.description":
+  "admin.config.share.enable-share-download-notifications.description":
     "Whether to send an email to the share creator when an email recipient downloads a file. This requires SMTP and email recipient sharing.",
   "admin.config.email.share-download-notification-subject":
     "Download notification subject",
@@ -573,8 +642,9 @@ export default {
     "Download notification message",
   "admin.config.email.share-download-notification-message.description":
     "Message which gets sent to the share creator when a recipient downloads a file. Available variables:\n {recipientEmail} - The email of the recipient\n {fileName} - The downloaded file name\n {shareUrl} - The URL of the share",
-  "admin.config.email.enable-email-verification": "Enable email verification",
-  "admin.config.email.enable-email-verification.description":
+  "admin.config.security.enable-email-verification":
+    "Enable email verification",
+  "admin.config.security.enable-email-verification.description":
     "Whether to require users to verify their email address before being able to sign in. This can only be enabled if SMTP is activated.",
   "admin.config.email.verification-subject": "Verification subject",
   "admin.config.email.verification-subject.description":
@@ -582,12 +652,12 @@ export default {
   "admin.config.email.verification-message": "Verification message",
   "admin.config.email.verification-message.description":
     "Message which gets sent to the user when they sign up. {url} will be replaced with the verification URL.",
-  "admin.config.share.allow-registration": "Allow registration",
-  "admin.config.share.allow-registration.description":
+  "admin.config.security.allow-registration": "Allow registration",
+  "admin.config.security.allow-registration.description":
     "Whether registration is allowed",
-  "admin.config.share.allow-unauthenticated-shares":
+  "admin.config.security.allow-unauthenticated-shares":
     "Allow unauthenticated shares",
-  "admin.config.share.allow-unauthenticated-shares.description":
+  "admin.config.security.allow-unauthenticated-shares.description":
     "Whether unauthenticated users can create shares",
   "admin.config.share.default-expiration": "Default expiration",
   "admin.config.share.default-expiration.description":
@@ -609,13 +679,18 @@ export default {
   "admin.config.share.auto-open-share-modal": "Auto open create share modal",
   "admin.config.share.auto-open-share-modal.description":
     "The share creation modal automatically appears when a user selects files, eliminating the need to manually click the button.",
-  "admin.config.share.allow-admin-access-all-shares":
+  "admin.config.security.allow-admin-access-all-shares":
     "Allow admin access to all shares",
-  "admin.config.share.reverse-share-simple-only": "Force reverse share simple mode",
+  "admin.config.share.reverse-share-simple-only":
+    "Force reverse share simple mode",
   "admin.config.share.reverse-share-simple-only.description":
     "Force reverse shares to be created in simple mode. If disabled, the creator of the reverse share can choose between simple and advanced mode.",
-  "admin.config.share.allow-admin-access-all-shares.description":
+  "admin.config.security.allow-admin-access-all-shares.description":
     "Allow administrators to access all shares, even if they are password protected, expired or deleted.",
+  "admin.config.share.enable-user-recipients":
+    "Enable sharing with registered users",
+  "admin.config.share.enable-user-recipients.description":
+    "When enabled, shares sent to a registered user's email address will automatically appear in their account. Users can also restrict share access to named recipients only.",
   "admin.config.share.file-retention-period": "File retention period",
   "admin.config.share.file-retention-period.description":
     "How long files are kept after a share expires or gets deleted. Only useful if the 'Allow admin access to all shares' is also enabled. Set to -1 to keep files forever.",
@@ -789,6 +864,8 @@ export default {
   "admin.config.s3.use-checksum": "Use checksum",
   "admin.config.s3.use-checksum.description":
     "Turn off for backends that do not support checksum (e.g. B2).",
+  "admin.config.s3.docs-link":
+    "CORS must be reconfigured on your bucket, see the {wikiLink} for details.",
   "admin.config.category.legal": "Legal",
   "admin.config.legal.enabled": "Enable legal notices",
   "admin.config.legal.enabled.description":
@@ -826,6 +903,10 @@ export default {
     "This {0} account is already linked to another account.",
   "error.msg.not_linked":
     "This {0} account hasn't been linked to any account yet.",
+  "error.msg.email_already_exists":
+    "An account with this email address already exists. Please sign in with your password and manually link your {0} account in your My Account page.",
+  "error.msg.email_not_verified":
+    "Your email address on this {0} account is not verified. Please verify your email with your identity provider before signing in.",
   "error.msg.unverified_account":
     "This {0} account is unverified, please try again after verification.",
   "error.msg.user_not_allowed": "You are not allowed to sign in.",
@@ -877,4 +958,21 @@ export default {
   "common.error.exact-length": "Must be exactly {length} characters",
   "common.error.invalid-number": "Must be a number",
   "common.error.field-required": "This field is required",
+
+  "common.error.password.lowercase":
+    "Password must contain at least one lowercase letter",
+  "common.error.password.uppercase":
+    "Password must contain at least one uppercase letter",
+  "common.error.password.number": "Password must contain at least one number",
+  "common.error.password.special":
+    "Password must contain at least one special character",
+
+  "admin.notice.modal.headerTag": "ADMINISTRATIVE ACTION REQUIRED",
+  "admin.notice.modal.defaultCheckboxLabel":
+    "I confirm that I have read this notice and understand the breaking changes.",
+  "admin.notice.modal.button.acknowledge": "Acknowledge & Dismiss",
+  "admin.notice.modal.button.acknowledging": "Acknowledging...",
+  "admin.notice.modal.docsLink": "View Documentation",
+  "admin.notice.modal.globalNoticeFooter":
+    "Note: Once acknowledged, this notice will be permanently dismissed for all administrators across all devices.",
 };

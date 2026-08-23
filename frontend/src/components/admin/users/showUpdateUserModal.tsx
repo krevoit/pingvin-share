@@ -18,16 +18,25 @@ import userService from "../../../services/user.service";
 import User from "../../../types/user.type";
 import toast from "../../../utils/toast.util";
 import FileSizeInput from "../../core/FileSizeInput";
+import { CustomPasswordPolicy } from "../../../types/config.type";
 
 const showUpdateUserModal = (
   modals: ModalsContextProps,
   user: User,
   getUsers: () => void,
+  customPasswordPolicy: CustomPasswordPolicy,
 ) => {
   const t = translateOutsideContext();
   return modals.openModal({
     title: t("admin.users.edit.update.title", { username: user.username }),
-    children: <Body user={user} modals={modals} getUsers={getUsers} />,
+    children: (
+      <Body
+        user={user}
+        modals={modals}
+        getUsers={getUsers}
+        customPasswordPolicy={customPasswordPolicy}
+      />
+    ),
   });
 };
 
@@ -35,10 +44,12 @@ const Body = ({
   user,
   modals,
   getUsers,
+  customPasswordPolicy,
 }: {
   modals: ModalsContextProps;
   user: User;
   getUsers: () => void;
+  customPasswordPolicy: CustomPasswordPolicy;
 }) => {
   const t = useTranslate();
 
@@ -52,6 +63,10 @@ const Body = ({
       shareSizeLimit: user.shareSizeLimit
         ? parseInt(user.shareSizeLimit)
         : 104857600,
+      hasCustomStorageQuotaLimit: !!user.storageQuotaLimit,
+      storageQuotaLimit: user.storageQuotaLimit
+        ? parseInt(user.storageQuotaLimit)
+        : 21474836480,
     },
     validate: yupResolver(
       yup.object().shape({
@@ -59,6 +74,16 @@ const Body = ({
         username: yup
           .string()
           .min(3, t("common.error.too-short", { length: 3 })),
+        storageQuotaLimit: yup
+          .number()
+          .test(
+            "storage-quota-positive",
+            "Storage quota must be greater than 0",
+            function (value) {
+              if (!this.parent.hasCustomStorageQuotaLimit) return true;
+              return (value ?? 0) > 0;
+            },
+          ),
       }),
     ),
   });
@@ -71,7 +96,31 @@ const Body = ({
       yup.object().shape({
         password: yup
           .string()
-          .min(8, t("common.error.too-short", { length: 8 })),
+          .min(
+            customPasswordPolicy.minLength,
+            t("common.error.too-short", {
+              length: customPasswordPolicy.minLength,
+            }),
+          )
+          .matches(
+            customPasswordPolicy.requireLowercase ? /[a-z]/ : /.*/,
+            t("common.error.password.lowercase"),
+          )
+          .matches(
+            customPasswordPolicy.requireUppercase ? /[A-Z]/ : /.*/,
+            t("common.error.password.uppercase"),
+          )
+          .matches(
+            customPasswordPolicy.requireNumber ? /[0-9]/ : /.*/,
+            t("common.error.password.number"),
+          )
+          .matches(
+            customPasswordPolicy.requireSpecialCharacter
+              ? /[^a-zA-Z0-9]/
+              : /.*/,
+            t("common.error.password.special"),
+          )
+          .required(t("common.error.field-required")),
       }),
     ),
   });
@@ -89,6 +138,9 @@ const Body = ({
               isActivated: values.isActivated,
               shareSizeLimit: values.hasCustomShareSizeLimit
                 ? values.shareSizeLimit.toString()
+                : null,
+              storageQuotaLimit: values.hasCustomStorageQuotaLimit
+                ? values.storageQuotaLimit.toString()
                 : null,
             })
             .then(() => {
@@ -143,6 +195,32 @@ const Body = ({
               value={accountForm.values.shareSizeLimit}
               onChange={(val) =>
                 accountForm.setFieldValue("shareSizeLimit", val)
+              }
+            />
+          )}
+          <Switch
+            styles={{
+              body: {
+                display: "flex",
+                justifyContent: "space-between",
+              },
+            }}
+            mt="xs"
+            labelPosition="left"
+            label={t("admin.users.edit.update.custom-storage-quota-limit")}
+            description={t(
+              "admin.users.edit.update.custom-storage-quota-limit.description",
+            )}
+            {...accountForm.getInputProps("hasCustomStorageQuotaLimit", {
+              type: "checkbox",
+            })}
+          />
+          {accountForm.values.hasCustomStorageQuotaLimit && (
+            <FileSizeInput
+              label={t("admin.users.edit.update.custom-storage-quota-limit")}
+              value={accountForm.values.storageQuotaLimit}
+              onChange={(val) =>
+                accountForm.setFieldValue("storageQuotaLimit", val)
               }
             />
           )}

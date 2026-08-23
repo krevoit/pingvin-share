@@ -1,5 +1,6 @@
 import {
   Alert,
+  Anchor,
   AppShell,
   Box,
   Button,
@@ -34,6 +35,7 @@ import toast from "../../../utils/toast.util";
 const categories = [
   "General",
   "Appearance",
+  "Security",
   "Email",
   "Share",
   "SMTP",
@@ -146,7 +148,11 @@ export default function AppShellDemo() {
       setConfigVariables(configVariables);
     });
 
-    if (categoryId === "email") {
+    if (
+      categoryId === "email" ||
+      categoryId === "security" ||
+      categoryId === "share"
+    ) {
       configService.getByCategory("smtp").then((smtpConfigVariables) => {
         const optionalConfigVariables = smtpConfigVariables.filter(
           (configVariable) => {
@@ -216,6 +222,7 @@ export default function AppShellDemo() {
                 const shouldShowPrimaryColorOverride =
                   getEffectiveConfigValue("appearance.themePrimaryColor") ===
                   "custom";
+                const shouldShowCustomPasswordPolicies = getEffectiveConfigValue("security.customPasswordPolicy") === "true";
                 const visibleConfigVariables = configVariables.filter(
                   (configVariable) =>
                     configVariable.key !== "appearance.customCss",
@@ -235,14 +242,46 @@ export default function AppShellDemo() {
                           <FormattedMessage id="admin.config.config-file-warning.description" />
                         </Alert>
                       )}
-                      <Title mb="md" order={3}>
+                      <Title
+                        mb={categoryId.toLowerCase() === "s3" ? "xs" : "md"}
+                        order={3}
+                      >
                         {t("admin.config.category." + categoryId)}
                       </Title>
+                      {categoryId.toLowerCase() === "s3" && (
+                        <Text color="dimmed" size="sm" mb="md">
+                          <FormattedMessage
+                            id="admin.config.s3.docs-link"
+                            values={{
+                              wikiLink: (
+                                <Anchor
+                                  href="https://smp46.github.io/pingvin-share-x/v2/setup/s3#cors-configuration"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  wiki
+                                </Anchor>
+                              ),
+                            }}
+                          />
+                        </Text>
+                      )}
                       {visibleConfigVariables.map((configVariable) => {
                         if (
-                          configVariable.key ===
+                          (configVariable.key ===
                             "appearance.themePrimaryColorOverride" &&
-                          !shouldShowPrimaryColorOverride
+                            !shouldShowPrimaryColorOverride) ||
+                          (configVariable.key === "security.minLength" &&
+                            !shouldShowCustomPasswordPolicies) ||
+                          (configVariable.key === "security.requireLowercase" &&
+                            !shouldShowCustomPasswordPolicies) ||
+                          (configVariable.key === "security.requireUppercase" &&
+                            !shouldShowCustomPasswordPolicies) ||
+                          (configVariable.key === "security.requireNumber" &&
+                            !shouldShowCustomPasswordPolicies) ||
+                          (configVariable.key ===
+                            "security.requireSpecialCharacter" &&
+                            !shouldShowCustomPasswordPolicies)
                         ) {
                           return null;
                         }
@@ -293,7 +332,7 @@ export default function AppShellDemo() {
                           </Group>
                         );
                       })}
-                      {categoryId == "general" && (
+                      {categoryId == "appearance" && (
                         <LogoConfigInput
                           logo={logo}
                           setLogo={setLogo}
@@ -350,6 +389,9 @@ export default function AppShellDemo() {
                             </Box>
                           </Group>
                         )}
+                      {/* {categoryId === "security" && shouldShowCustomPasswordPolicies && ( */}
+                      {/**/}
+                      {/* )} */}
                     </Stack>
                   </>
                 );

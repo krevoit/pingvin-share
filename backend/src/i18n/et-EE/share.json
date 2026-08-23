@@ -9,8 +9,11 @@
   "anonymousNoUpdate": "Anonüümseid jagamisi ei saa uuendada",
   "invalidExpiration": "Vigane aegumiskuupäev",
   "maxExpirationExceeded": "Aegumiskuupäev ületab maksimaalset aegumiskuupäeva",
+  "storageQuotaExceeded": "Kasutaja salvestusruumi kvoot on ületatud {exceededSize} võrra",
+  "reverseShareQuotaExceeded": "Pööratud jagamise omaniku salvestusruumi kvoot on ületatud {exceededSize} võrra",
   "wrongPassword": "Vale parool",
   "tokenRequired": "Jagamise token on kohustuslik",
   "privateShare": "Sellele jagamisele pääseb ligi ainult pöörd-jagamise looja",
-  "maxViewsExceeded": "Maksimaalne vaatamiste arv on täis"
+  "maxViewsExceeded": "Maksimaalne vaatamiste arv on täis",
+  "restrictedToRecipients": "See jagamine on piiratud konkreetsetele saajatele. Palun logi sisse, et sellele ligi pääseda."
 }

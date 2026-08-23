@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -7,16 +8,16 @@ import {
 } from "@nestjs/common";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { Cache } from "cache-manager";
+import { Share, User } from "@prisma/client";
+import * as crypto from "crypto";
+import * as moment from "moment";
 import { LocalFileService } from "./local.service";
 import { S3FileService } from "./s3.service";
 import { ConfigService } from "src/config/config.service";
 import { Readable } from "stream";
 import { PrismaService } from "../prisma/prisma.service";
 import { EmailService } from "src/email/email.service";
-import * as crypto from "crypto";
-import * as moment from "moment";
 import { I18nService } from "nestjs-i18n";
-import { Share, User } from "@prisma/client";
 
 const UPDATED_AT_THROTTLE_MS = 5 * 60 * 1000;
 const DOWNLOAD_NOTIFICATION_COOLDOWN_MS = 15 * 60 * 1000;
@@ -30,8 +31,8 @@ export class FileService {
     private s3FileService: S3FileService,
     private configService: ConfigService,
     private emailService: EmailService,
-    @Inject(CACHE_MANAGER) private cache: Cache,
     private readonly i18n: I18nService,
+    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
   private readonly logger = new Logger(FileService.name);
 
@@ -78,6 +79,85 @@ export class FileService {
       where: { id: shareId },
       data: { updatedAt: new Date() },
     });
+  }
+
+  async createPreSignedUploadUrls(
+    shareId: string,
+    fileName: string,
+    totalChunks: number,
+  ) {
+    await this.touchShare(shareId);
+    const share = await this.prisma.share.findFirst({
+      where: { id: shareId },
+      select: { storageProvider: true },
+    });
+    if (share?.storageProvider !== "S3") {
+      return { directToS3: false };
+    }
+    const res = await this.s3FileService.createPreSignedUploadUrls(
+      shareId,
+      fileName,
+      totalChunks,
+    );
+    return { directToS3: true, ...res };
+  }
+
+  async completePreSignedUpload(
+    shareId: string,
+    fileId: string,
+    fileName: string,
+    uploadId: string,
+    parts: Array<{ ETag: string; PartNumber: number }>,
+  ) {
+    await this.touchShare(shareId);
+    const share = await this.prisma.share.findFirst({
+      where: { id: shareId },
+      select: { storageProvider: true },
+    });
+    if (share?.storageProvider !== "S3") {
+      throw new BadRequestException(this.i18n.t("file.s3NotSupported"));
+    }
+    return this.s3FileService.completePreSignedUpload(
+      shareId,
+      fileId,
+      fileName,
+      uploadId,
+      parts,
+    );
+  }
+
+  async abortPreSignedUpload(
+    shareId: string,
+    fileName: string,
+    uploadId: string,
+  ) {
+    const share = await this.prisma.share.findFirst({
+      where: { id: shareId },
+      select: { storageProvider: true },
+    });
+    if (share?.storageProvider !== "S3") {
+      throw new BadRequestException(this.i18n.t("file.s3NotSupported"));
+    }
+    return this.s3FileService.abortPreSignedUpload(shareId, fileName, uploadId);
+  }
+
+  async getPreSignedDownloadUrl(
+    shareId: string,
+    fileId: string,
+    isDownload: boolean,
+  ): Promise<string> {
+    const share = await this.prisma.share.findFirst({
+      where: { id: shareId },
+      select: { storageProvider: true },
+    });
+    if (share?.storageProvider !== "S3") {
+      throw new BadRequestException(this.i18n.t("file.s3NotSupported"));
+    }
+    return this.s3FileService.getPreSignedDownloadUrl(
+      shareId,
+      fileId,
+      isDownload,
+    );
   }
 
   async get(shareId: string, fileId: string): Promise<File> {
@@ -254,8 +334,8 @@ export class FileService {
       if (
         !recipientId ||
         !this.configService.get("smtp.enabled") ||
-        !this.configService.get("email.enableShareEmailRecipients") ||
-        !this.configService.get("email.enableShareDownloadNotifications")
+        !this.configService.get("share.enableShareEmailRecipients") ||
+        !this.configService.get("share.enableShareDownloadNotifications")
       )
         return;
 
@@ -295,6 +375,23 @@ export class FileService {
         e instanceof Error ? e.stack : String(e),
       );
     }
+  }
+
+  async getStorageProvider(shareId: string): Promise<string> {
+    const share = await this.prisma.share.findFirst({
+      where: { id: shareId },
+      select: { storageProvider: true },
+    });
+    return share?.storageProvider || "LOCAL";
+  }
+
+  async getFileName(shareId: string, fileId: string): Promise<string> {
+    const file = await this.prisma.file.findFirst({
+      where: { id: fileId, shareId },
+      select: { name: true },
+    });
+    if (!file) throw new NotFoundException(this.i18n.t("file.notFound"));
+    return file.name;
   }
 
   private async streamToUint8Array(stream: Readable): Promise<Uint8Array> {

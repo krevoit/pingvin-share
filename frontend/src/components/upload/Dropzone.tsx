@@ -1,8 +1,17 @@
-import { Button, Center, createStyles, Group, Text, Menu } from "@mantine/core";
+import {
+  Button,
+  Center,
+  createStyles,
+  Group,
+  Text,
+  Menu,
+  useMantineColorScheme,
+} from "@mantine/core";
 import { Dropzone as MantineDropzone } from "@mantine/dropzone";
-import React, { ForwardedRef, useRef } from "react";
+import React, { ForwardedRef, useEffect, useRef, useState } from "react";
 import { TbCloudUpload, TbUpload, TbFolder } from "react-icons/tb";
 import { FormattedMessage } from "react-intl";
+import { fromEvent } from "file-selector";
 import useTranslate from "../../hooks/useTranslate.hook";
 import { FileUpload } from "../../types/File.type";
 import { byteToHumanSizeString } from "../../utils/fileSize.util";
@@ -64,7 +73,7 @@ const traverseDirectory = async (entry: any, path = ""): Promise<File[]> => {
     }
 
     const promises = entries.map((e) =>
-      traverseDirectory(e, path ? `${path}/${entry.name}` : entry.name)
+      traverseDirectory(e, path ? `${path}/${entry.name}` : entry.name),
     );
     const results = await Promise.all(promises);
     return results.flat();
@@ -73,12 +82,21 @@ const traverseDirectory = async (entry: any, path = ""): Promise<File[]> => {
 };
 
 const getFilesFromEvent = async (event: any): Promise<any[]> => {
-  const items = event.dataTransfer ? event.dataTransfer.items : event.target.files;
-  if (!items) return [];
+  if (Array.isArray(event)) {
+    const filePromises = event.map(async (item: any) => {
+      if (item && typeof item.getFile === "function") {
+        return await item.getFile();
+      }
+      return item;
+    });
+    return await Promise.all(filePromises);
+  }
 
-  const filePromises: Promise<File[]>[] = [];
+  if (event?.dataTransfer) {
+    const items = event.dataTransfer.items;
+    if (!items) return [];
 
-  if (event.dataTransfer) {
+    const filePromises: Promise<File[]>[] = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.kind === "file") {
@@ -95,9 +113,13 @@ const getFilesFromEvent = async (event: any): Promise<any[]> => {
     }
     const fileArrays = await Promise.all(filePromises);
     return fileArrays.flat();
-  } else {
-    return Array.from(items) as File[];
   }
+
+  if (event?.target?.files) {
+    return Array.from(event.target.files) as File[];
+  }
+
+  return await fromEvent(event);
 };
 
 const Dropzone = ({
@@ -117,9 +139,16 @@ const Dropzone = ({
   const { classes } = useStyles();
   const openRef = useRef<() => void>();
   const folderInputRef = useRef<HTMLInputElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const { colorScheme } = useMantineColorScheme();
+  const dark = colorScheme === "dark";
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const isFolderUploadSupported =
-    typeof window !== "undefined" &&
+    isMounted &&
     typeof HTMLInputElement !== "undefined" &&
     "webkitdirectory" in HTMLInputElement.prototype;
 
@@ -207,7 +236,7 @@ const Dropzone = ({
         {isFolderUploadSupported && (
           <Button
             className={classes.control}
-            variant="light"
+            variant={dark ? "filled" : "light"}
             size="sm"
             radius="xl"
             disabled={isUploading}
@@ -215,7 +244,11 @@ const Dropzone = ({
           >
             <TbFolder style={{ marginRight: 6 }} />
             <FormattedMessage
-              id={currentFilesSize > 0 ? "upload.button.folder.append" : "upload.button.folder"}
+              id={
+                currentFilesSize > 0
+                  ? "upload.button.folder.append"
+                  : "upload.button.folder"
+              }
             />
           </Button>
         )}

@@ -174,7 +174,7 @@ const Header = () => {
     },
   ];
 
-  if (config.get("share.allowUnauthenticatedShares")) {
+  if (config.get("security.allowUnauthenticatedShares")) {
     unauthenticatedLinks.unshift({
       link: "/upload",
       label: t("navbar.upload"),
@@ -187,7 +187,7 @@ const Header = () => {
       label: t("navbar.home"),
     });
 
-  if (config.get("share.allowRegistration"))
+  if (config.get("security.allowRegistration"))
     unauthenticatedLinks.push({
       link: "/auth/signUp",
       label: t("navbar.signup"),
@@ -217,6 +217,14 @@ const Header = () => {
       link: "/account/reverseShares",
       label: t("navbar.links.reverse"),
     },
+    ...(config.get("share.enableUserRecipients")
+      ? [
+          {
+            link: "/account/received",
+            label: t("navbar.links.received"),
+          },
+        ]
+      : []),
   ];
 
   const mobileProfileLinks: NavLink[] = [

@@ -9,8 +9,11 @@
   "anonymousNoUpdate": "Không thể cập nhật chia sẻ ẩn danh",
   "invalidExpiration": "Ngày hết hạn không hợp lệ",
   "maxExpirationExceeded": "Ngày hết hạn vượt quá ngày hết hạn tối đa",
+  "storageQuotaExceeded": "Hạn mức lưu trữ của người dùng đã bị vượt quá {exceededSize}",
+  "reverseShareQuotaExceeded": "Hạn mức lưu trữ của chủ sở hữu chia sẻ ngược đã bị vượt quá {exceededSize}",
   "wrongPassword": "Sai mật khẩu",
   "tokenRequired": "Yêu cầu token chia sẻ",
   "privateShare": "Chỉ người tạo chia sẻ ngược mới có thể truy cập chia sẻ này",
-  "maxViewsExceeded": "Vượt quá số lượt xem tối đa"
+  "maxViewsExceeded": "Vượt quá số lượt xem tối đa",
+  "restrictedToRecipients": "Chia sẻ này được giới hạn cho những người nhận cụ thể. Vui lòng đăng nhập để truy cập."
 }

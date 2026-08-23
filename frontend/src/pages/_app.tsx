@@ -34,6 +34,10 @@ import i18nUtil from "../utils/i18n.util";
 import userPreferences from "../utils/userPreferences.util";
 import Footer from "../components/footer/Footer";
 import { getDefaultConfig } from "../utils/defaultConfig.util";
+import AdminNoticeModal, {
+  AdminNotice,
+} from "../components/admin/AdminNoticeModal";
+import adminNoticeService from "../services/adminNotice.service";
 
 const excludeDefaultLayoutRoutes = ["/admin/config/[category]"];
 const availableMantineColors = [
@@ -218,7 +222,9 @@ function App({ Component, pageProps }: AppProps) {
     if (!pageProps.language) return;
     const cookieLanguage = getCookie("language");
     if (!cookieLanguage) {
-      i18nUtil.setLanguageCookie(pageProps.language);
+      if (!pageProps.isConfigFallback) {
+        i18nUtil.setLanguageCookie(pageProps.language);
+      }
     } else if (pageProps.language !== cookieLanguage) {
       location.reload();
     }
@@ -227,7 +233,7 @@ function App({ Component, pageProps }: AppProps) {
 
     document.documentElement.dir = current.direction ?? "ltr";
     document.documentElement.lang = current.code;
-  }, [pageProps.language]);
+  }, [pageProps.language, pageProps.isConfigFallback]);
 
   useEffect(() => {
     const userColorPreference = userPreferences.get("colorScheme");
@@ -251,6 +257,33 @@ function App({ Component, pageProps }: AppProps) {
 
   const language = useRef(pageProps.language);
   moment.locale(language.current);
+
+  const [pendingNotices, setPendingNotices] = useState<AdminNotice[]>([]);
+
+  useEffect(() => {
+    if (user?.isAdmin) {
+      adminNoticeService
+        .getPendingNotices()
+        .then((notices) => {
+          if (notices && Array.isArray(notices)) {
+            setPendingNotices(notices);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [user?.id, user?.isAdmin]);
+
+  const handleDismissNotice = async (noticeId: string) => {
+    setPendingNotices((prev) => prev.filter((n) => n.id !== noticeId));
+    try {
+      await adminNoticeService.dismissNotice(noticeId);
+    } catch {
+      adminNoticeService
+        .getPendingNotices()
+        .then((notices) => setPendingNotices(notices || []))
+        .catch(() => {});
+    }
+  };
 
   return (
     <>
@@ -296,6 +329,10 @@ function App({ Component, pageProps }: AppProps) {
                     },
                   }}
                 >
+                  <AdminNoticeModal
+                    notice={pendingNotices[0] || null}
+                    onDismiss={handleDismissNotice}
+                  />
                   {excludeDefaultLayoutRoutes.includes(route) ? (
                     <Component {...pageProps} />
                   ) : (
@@ -333,6 +370,7 @@ App.getInitialProps = async ({ ctx }: { ctx: GetServerSidePropsContext }) => {
     route?: string;
     colorScheme: ColorScheme;
     language?: string;
+    isConfigFallback?: boolean;
   } = {
     route: ctx.resolvedUrl,
     colorScheme:
@@ -357,6 +395,7 @@ App.getInitialProps = async ({ ctx }: { ctx: GetServerSidePropsContext }) => {
       ).data;
     } catch (e) {
       pageProps.configVariables = getDefaultConfig();
+      pageProps.isConfigFallback = true;
     }
 
     pageProps.route = ctx.req.url;

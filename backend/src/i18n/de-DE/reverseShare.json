@@ -1,4 +1,5 @@
 {
   "notFound": "Reverse-Share-Token nicht gefunden",
-  "maxShareSizeExceeded": "Die maximale Freigabegröße darf nicht größer als {maxSize} Bytes sein."
+  "maxShareSizeExceeded": "Die maximale Freigabegröße darf nicht größer als {maxSize} Bytes sein.",
+  "tokenInUse": "Token für Datei-Anfrage wird bereits verwendet"
 }

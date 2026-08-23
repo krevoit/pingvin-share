@@ -9,8 +9,11 @@
   "anonymousNoUpdate": "Anonyme delinger kan ikke opdateres",
   "invalidExpiration": "Ugyldig udløbsdato",
   "maxExpirationExceeded": "Udløbsdato overstiger den maksimale udløbsdato",
+  "storageQuotaExceeded": "Brugerens lagerkvote er overskredet med {exceededSize}",
+  "reverseShareQuotaExceeded": "Lagerkvoten for ejeren af den omvendte deling er blevet overskredet med {exceededSize}",
   "wrongPassword": "Forkert adgangskode",
   "tokenRequired": "Delings-token påkrævet",
   "privateShare": "Kun skaberen af den omvendte deling har adgang til denne deling",
-  "maxViewsExceeded": "Maksimalt antal visninger overskredet"
+  "maxViewsExceeded": "Maksimalt antal visninger overskredet",
+  "restrictedToRecipients": "Denne deling er begrænset til specifikke modtagere. Log venligst ind for at få adgang."
 }

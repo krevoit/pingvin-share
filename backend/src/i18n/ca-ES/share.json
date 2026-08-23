@@ -9,8 +9,11 @@
   "anonymousNoUpdate": "Les comparticions anònimes no es poden actualitzar",
   "invalidExpiration": "Data de caducitat no vàlida",
   "maxExpirationExceeded": "La data de caducitat supera la data de caducitat màxima",
+  "storageQuotaExceeded": "S'ha superat la quota d'emmagatzematge de l'usuari en {exceededSize}",
+  "reverseShareQuotaExceeded": "S'ha superat la quota d'emmagatzematge del propietari de la compartició inversa en {exceededSize}",
   "wrongPassword": "Contrasenya incorrecta",
   "tokenRequired": "Cal el token de compartició",
   "privateShare": "Només el creador de la compartició inversa pot accedir a aquesta compartició",
-  "maxViewsExceeded": "S'ha superat el nombre màxim de visualitzacions"
+  "maxViewsExceeded": "S'ha superat el nombre màxim de visualitzacions",
+  "restrictedToRecipients": "Aquesta compartició està restringida a destinataris específics. Inicieu sessió per accedir-hi."
 }

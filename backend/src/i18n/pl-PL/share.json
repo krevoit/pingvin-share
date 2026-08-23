@@ -9,8 +9,11 @@
   "anonymousNoUpdate": "Nie można aktualizować anonimowych udostępnień",
   "invalidExpiration": "Nieprawidłowa data wygaśnięcia",
   "maxExpirationExceeded": "Data wygaśnięcia przekracza maksymalną dopuszczalną datę",
+  "storageQuotaExceeded": "Limit miejsca na dysku użytkownika został przekroczony o {exceededSize}",
+  "reverseShareQuotaExceeded": "Limit miejsca na dysku właściciela udziału odwrotnego został przekroczony o {exceededSize}",
   "wrongPassword": "Błędne hasło",
   "tokenRequired": "Token udostępnienia jest wymagany",
   "privateShare": "Tylko twórca odwrotnego udostępnienia ma dostęp do tego udostępnienia",
-  "maxViewsExceeded": "Przekroczono maksymalną liczbę wyświetleń"
+  "maxViewsExceeded": "Przekroczono maksymalną liczbę wyświetleń",
+  "restrictedToRecipients": "Ten udział jest ograniczony do określonych odbiorców. Zaloguj się, aby uzyskać dostęp."
 }
