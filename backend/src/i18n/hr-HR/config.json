@@ -8,5 +8,6 @@
   "editNotAllowed": "Dopušteno vam je ažurirati konfiguracijske varijable samo putem datoteke config.yaml",
   "invalidType": "Konfiguracijska varijabla mora biti tipa {type}",
   "shareIdLengthValidation": "Duljina ID-a dijeljenja mora biti između 2 i 50",
-  "zipCompressionLevelValidation": "Razina Zip kompresije mora biti između 0 i 9"
+  "zipCompressionLevelValidation": "Razina Zip kompresije mora biti između 0 i 9",
+  "deprecatedVariable": "Konfiguracijska varijabla '{legacyKey}' je zastarjela. Premjestite je u '{modernKey}' u svojoj datoteci config.yaml"
 }

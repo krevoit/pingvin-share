@@ -12,13 +12,17 @@ export default {
   "navbar.avatar.signout": "Logg ut",
   // END navbar
 
+  // Footer
+  "footer.poweredBy": "Basert på",
+  // END footer
+
   // /
-  "home.title": "En <h>selvhostet</h> fildelingsplattform.",
+  "home.title": "En <h>egendriftet</h> fildelingsplattform.",
   "home.description": "Vil du virkelig gi dine personlige filer i hendene på tredjeparter som WeTransfer?",
-  "home.bullet.a.name": "Selvhostet",
-  "home.bullet.a.description": "Host Pingvin Share på din egen maskin.",
+  "home.bullet.a.name": "Egendriftet",
+  "home.bullet.a.description": "Kjør Pingvin Share på din egen maskin.",
   "home.bullet.b.name": "Personvern",
-  "home.bullet.b.description": "Filene dine er dine og vil aldri bli aksessert av tredjeparter.",
+  "home.bullet.b.description": "Filene dine er dine og vil aldri bli tilgjengelig for tredjeparter.",
   "home.bullet.c.name": "Ingen irriterende grense på filstørrelse",
   "home.bullet.c.description": "Last opp så store filer du vil. Bare harddisken din setter grenser.",
   "home.button.start": "Kom i gang",
@@ -49,6 +53,8 @@ export default {
   "signup.title": "Opprett en konto",
   "signup.description": "Har du allerede en konto?",
   "signup.button.signin": "Logg inn",
+  "signup.input.displayName": "Visningsnavn",
+  "signup.input.displayName.placeholder": "Ditt visningsnavn",
   "signup.input.username": "Brukernavn",
   "signup.input.username.placeholder": "Ditt brukernavn",
   "signup.input.email": "E-post",
@@ -84,6 +90,7 @@ export default {
   // /account
   "account.title": "Min konto",
   "account.card.info.title": "Kontoinformasjon",
+  "account.card.info.displayName": "Visningsnavn",
   "account.card.info.username": "Brukernavn",
   "account.card.info.email": "E-post",
   "account.notify.info.success": "Konto oppdatert",
@@ -171,6 +178,7 @@ export default {
   "account.reverseShares.description": "En omvendt deling lar deg generere en unik URL som lar eksterne brukere opprette en deling.",
   "account.reverseShares.title.empty": "Det er tomt her 👀",
   "account.reverseShares.description.empty": "Du har ingen omvendte delinger.",
+  "account.reverseShares.description.not-allowed": "Kontoen din har ikke tillatelse til å opprette omvendte delinger.",
   // showCreateReverseShareModal.tsx
   "account.reverseShares.modal.title": "Opprett omvendt deling",
   "account.reverseShares.modal.expiration.label": "Utløp",
@@ -219,14 +227,25 @@ export default {
 
   // /admin/users
   "admin.users.title": "Brukerbehandling",
+  "admin.users.table.displayName": "Visningsnavn",
   "admin.users.table.username": "Brukernavn",
   "admin.users.table.email": "E-post",
   "admin.users.table.admin": "Administrator",
   "admin.users.table.storageQuota": "Lagringskvote",
   "admin.users.table.maxShareSize": "Maks delingsstørrelse",
+  "admin.users.edit.tabs.general": "Generelt",
+  "admin.users.edit.tabs.permissions": "Tillatelser",
   "admin.users.edit.update.title": "Rediger bruker: {username}",
   "admin.users.edit.update.admin-privileges": "Administratorrettigheter",
   "admin.users.edit.update.email-verified": "E-post verifisert",
+  "admin.users.edit.permissions.allow-share": "Tillat å opprette delinger",
+  "admin.users.edit.permissions.allow-share.description": "Hvorvidt denne brukeren har tillatelse til å laste opp og opprette nye delinger",
+  "admin.users.edit.permissions.allow-reverse-share": "Tillat å opprette omvendte delinger",
+  "admin.users.edit.permissions.allow-reverse-share.description": "Hvorvidt denne brukeren har tillatelse til å generere lenker for omvendt deling",
+  "admin.users.edit.permissions.custom-max-shares": "Maksgrense for aktive delinger",
+  "admin.users.edit.permissions.custom-max-shares.description": "Begrens det maksimale antallet samtidige aktive delinger denne brukeren kan ha",
+  "admin.users.edit.permissions.custom-max-reverse-shares": "Maksgrense for aktive omvendte delinger",
+  "admin.users.edit.permissions.custom-max-reverse-shares.description": "Begrens det maksimale antallet samtidige aktive omvendte delinger denne brukeren kan ha",
   "admin.users.edit.update.custom-share-size-limit": "Egendefinert grense for delingsstørrelse",
   "admin.users.edit.update.custom-share-size-limit.description": "Overstyr den globale opplastingsgrensen for denne brukeren",
   "admin.users.edit.update.custom-storage-quota-limit": "Egendefinert lagringskvote",
@@ -239,6 +258,7 @@ export default {
   "admin.users.edit.delete.description": "Vil du virkelig slette denne brukeren og alle deres delinger?",
   // showCreateUserModal.tsx
   "admin.users.modal.create.title": "Opprett bruker",
+  "admin.users.modal.create.displayName": "Visningsnavn",
   "admin.users.modal.create.username": "Brukernavn",
   "admin.users.modal.create.email": "E-post",
   "admin.users.modal.create.password": "Passord",
@@ -272,9 +292,14 @@ export default {
   "upload.notify.duplicate-skipped": "Hoppet over duplisert fil: {name}",
   "upload.reverse-share.error.invalid.title": "Ugyldig omvendt delingslenke",
   "upload.reverse-share.error.invalid.description": "Denne lenken har ingen gjenværende bruksområder eller er ugyldig.",
+  "upload.error.not-allowed.title": "Oppretting av deling er ikke tillatt",
+  "upload.error.not-allowed.description": "Kontoen din har ikke tillatelse til å laste opp eller opprette delinger.",
   // Dropzone.tsx
   "upload.dropzone.title": "Last opp filer",
-  "upload.dropzone.description": "Dra og slipp filer eller mapper her for å starte delingen, eller trykk «Ctrl+V» for å laste opp tekstinnhold fra utklippstavlen. Vi godtar bare filer opptil {maxSize} totalt.",
+  "upload.dropzone.description.mobile": "Trykk her for å velge enkeltfiler, bilder eller videoer. Bruk knappen nedenfor for å laste opp en mappe. Maksimal total opplastingsstørrelse: {maxSize}.",
+  "upload.dropzone.description.mobile.no-folder": "Trykk her for å velge enkeltfiler, bilder eller videoer. Maksimal total opplastingsstørrelse: {maxSize}.",
+  "upload.dropzone.description.desktop": "Klikk her eller dra og slipp enkeltfiler, bilder eller videoer. Bruk knappen nedenfor for å laste opp en mappe, eller trykk {shortcut} for å laste opp tekst fra utklippstavlen. Maksimal total opplastingsstørrelse: {maxSize}.",
+  "upload.dropzone.description.desktop.no-folder": "Klikk her eller dra og slipp enkeltfiler, bilder eller videoer, eller trykk {shortcut} for å laste opp tekst fra utklippstavlen. Maksimal total opplastingsstørrelse: {maxSize}.",
   "upload.dropzone.notify.file-too-big": "Filene dine overskrider den maksimale delingsstørrelsen på {maxSize}.",
   "upload.button.folder": "Last opp mappe",
   "upload.button.folder.append": "Legg til mappe",
@@ -368,7 +393,7 @@ export default {
   // END /share/[id]/edit
 
   // /imprint
-  "imprint.title": "Impressum",
+  "imprint.title": "Leverandørinformasjon",
   // END /imprint
 
   // /privacy
@@ -389,6 +414,8 @@ export default {
   "admin.config.category.oauth": "Sosial innlogging",
   "admin.config.general.app-name": "App-navn",
   "admin.config.general.app-name.description": "Namn på applikasjonen",
+  "admin.config.general.show-auth-buttons": "Vis autentiseringsknapper",
+  "admin.config.general.show-auth-buttons.description": "Hvorvidt innloggings- og registreringsknapper skal vises på delings- og opplastingssider.",
   "admin.config.general.default-language": "Standard språk",
   "admin.config.general.default-language.description": "Dette gjelder for alle brukere. Hver bruker kan fortsatt tilpasse språket sitt i profilen sin.",
   "admin.config.appearance.theme-primary-color": "Hovedfarge for tema",
@@ -536,6 +563,8 @@ export default {
   "admin.config.oauth.ignore-totp.description": "Om TOTP skal ignoreres når brukeren benytter sosial innlogging",
   "admin.config.oauth.disable-password": "Deaktiver passordinnlogging",
   "admin.config.oauth.disable-password.description": "Om passordinnlogging skal deaktiveres\nSørg for at en OAuth-tilbyder er riktig konfigurert før du aktiverer denne innstillingen, for å unngå å bli låst ute.",
+  "admin.config.oauth.allowed-hosts": "Tillatte OAuth-verter",
+  "admin.config.oauth.allowed-hosts.description": "En kommaseparert liste over ytterligere vertsnavn som er tillatt for OAuth-pålogging (f.eks. share.internal.example.com).",
   "admin.config.oauth.github-enabled": "GitHub",
   "admin.config.oauth.github-enabled.description": "Om GitHub-innlogging er aktivert",
   "admin.config.oauth.github-client-id": "GitHub Client-ID",
@@ -605,6 +634,8 @@ export default {
   "admin.config.ldap.field-name-member-of.description": "LDAP-attributtnavn for gruppene en bruker er medlem av. Dette brukes ved kontroll av administratorgruppen.",
   "admin.config.ldap.field-name-email": "Attributtnavn for brukere-post",
   "admin.config.ldap.field-name-email.description": "LDAP-attributtnavn for brukerens e-post.",
+  "admin.config.ldap.field-name-display-name": "Attributtnavn for brukerens visningsnavn",
+  "admin.config.ldap.field-name-display-name.description": "LDAP-attributtnavn for brukerens visningsnavn.",
   "admin.config.notify.success": "Konfigurasjonen ble oppdatert.",
   "admin.config.notify.logo-success": "Logoen ble oppdatert. Det kan ta noen minutter før den oppdateres på nettstedet.",
   "admin.config.notify.no-changes": "Ingen endringer å lagre.",
@@ -628,11 +659,11 @@ export default {
   "admin.config.s3.docs-link": "CORS må rekonfigureres på bøtten din, se {wikiLink} for detaljer.",
   "admin.config.category.legal": "Juridisk",
   "admin.config.legal.enabled": "Aktiver juridiske merknader",
-  "admin.config.legal.enabled.description": "Om det skal vises en lenke to impressum og personvernerklæring i bunnteksten.",
-  "admin.config.legal.imprint-text": "Impressum-tekst",
-  "admin.config.legal.imprint-text.description": "Teksten som skal vises i impressum. Støtter Markdown. La stå tomt for å lenke til en ekstern impressumside.",
-  "admin.config.legal.imprint-url": "Impressum-URL",
-  "admin.config.legal.imprint-url.description": "Hvis du allerede har en impressumside, kan du lenke til den her i stedet for å bruke tekstfeltet.",
+  "admin.config.legal.enabled.description": "Om det skal vises en lenke til leverandørinformasjon og personvernerklæring i bunnteksten.",
+  "admin.config.legal.imprint-text": "Tekst for leverandørinformasjon",
+  "admin.config.legal.imprint-text.description": "Teksten som skal vises i leverandørinformasjon. Støtter Markdown. La stå tomt for å lenke til en ekstern leverandørinformasjonsside.",
+  "admin.config.legal.imprint-url": "URL til leverandørinformasjon",
+  "admin.config.legal.imprint-url.description": "Hvis du allerede har en side med leverandørinformasjon, kan du lenke til den her i stedet for å bruke tekstfeltet.",
   "admin.config.legal.privacy-policy-text": "Personvernerklæring-tekst",
   "admin.config.legal.privacy-policy-text.description": "Teksten som skal vises i personvernerklæringen. Støtter Markdown. La stå tomt for å lenke til en ekstern personvernerklæringside.",
   "admin.config.legal.privacy-policy-url": "Personvernerklæring-URL",
@@ -657,6 +688,7 @@ export default {
   "error.msg.unverified_account": "Denne {0}-kontoen er ikke verifisert. Prøv igjen etter verifisering.",
   "error.msg.user_not_allowed": "Du har ikke tillatelse til å logge inn.",
   "error.msg.cannot_get_user_info": "Kan ikke hente brukerinformasjonen din fra denne {0}-kontoen.",
+  "error.msg.oidc_configuration_error": "Kunne ikke hente OpenID Connect-konfigurasjon fra identitetsleverandøren din.",
   "error.param.provider_github": "GitHub",
   "error.param.provider_google": "Google",
   "error.param.provider_microsoft": "Microsoft",
@@ -701,6 +733,7 @@ export default {
   "common.error.exact-length": "Må være nøyaktig {length} tegn",
   "common.error.invalid-number": "Må være et tall",
   "common.error.field-required": "Dette feltet er obligatorisk",
+  "common.error.name.invalid-chars": "Må bare inneholde bokstaver, mellomrom, komma, punktum, apostrofer eller bindestreker",
   "common.error.password.lowercase": "Passordet må inneholde minst én liten bokstav",
   "common.error.password.uppercase": "Passordet må inneholde minst én stor bokstav",
   "common.error.password.number": "Passordet må inneholde minst ett tall",
@@ -710,5 +743,5 @@ export default {
   "admin.notice.modal.button.acknowledge": "Bekreft og lukk",
   "admin.notice.modal.button.acknowledging": "Bekrefter...",
   "admin.notice.modal.docsLink": "Se dokumentasjon",
-  "admin.notice.modal.globalNoticeFooter": "Merk: Når den er bekræftet, vil denne meldingen bli permanent fjernet for alle administratorer på tvers av alle enheter.",
+  "admin.notice.modal.globalNoticeFooter": "Merk: Når den er bekræftet, vil denne meldingen bli permanent fjernet for alle administratorer på tvers av alle enheter."
 };

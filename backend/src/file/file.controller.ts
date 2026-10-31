@@ -4,17 +4,19 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Post,
   Query,
+  Req,
   Res,
   StreamableFile,
   UseGuards,
 } from "@nestjs/common";
-import { SkipThrottle } from "@nestjs/throttler";
+import { SkipThrottle, Throttle } from "@nestjs/throttler";
 import { User } from "@prisma/client";
 import * as contentDisposition from "content-disposition";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { GetUser } from "src/auth/decorator/getUser.decorator";
 import { CreateShareGuard } from "src/share/guard/createShare.guard";
 import { StrictShareOwnerGuard } from "src/share/guard/strictShareOwner.guard";
@@ -142,9 +144,16 @@ export class FileController {
     return new StreamableFile(zipStream);
   }
 
+  @Throttle({
+    default: {
+      limit: 1200,
+      ttl: 60 * 1000,
+    },
+  })
   @Get(":fileId")
   @UseGuards(FileSecurityGuard)
   async getFile(
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
     @Param("shareId") shareId: string,
     @Param("fileId") fileId: string,
@@ -172,7 +181,18 @@ export class FileController {
       return;
     }
 
-    const file = await this.fileService.get(shareId, fileId);
+    const file = await this.fileService.get(shareId, fileId, req.headers.range);
+
+    const totalSize = parseInt(file.metaData.size, 10);
+
+    if (file.isRangeNotSatisfiable) {
+      res.status(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+      res.set({
+        "Content-Range": `bytes */${totalSize}`,
+        "Accept-Ranges": "bytes",
+      });
+      return;
+    }
 
     const mimeType =
       mime?.lookup?.(file.metaData.name) || "application/octet-stream";
@@ -183,9 +203,9 @@ export class FileController {
       (mimeType.startsWith("image/") && mimeType !== "image/svg+xml") ||
       mimeType === "text/plain";
 
-    const headers: Record<string, any> = {
+    const headers: Record<string, string | number> = {
       "Content-Type": mimeType,
-      "Content-Length": file.metaData.size,
+      "Accept-Ranges": "bytes",
       "X-Content-Type-Options": "nosniff",
       "Content-Disposition": contentDisposition(
         file.metaData.name,
@@ -193,13 +213,22 @@ export class FileController {
       ),
     };
 
+    if (file.range) {
+      res.status(HttpStatus.PARTIAL_CONTENT);
+      headers["Content-Range"] =
+        `bytes ${file.range.start}-${file.range.end}/${totalSize}`;
+      headers["Content-Length"] = file.range.end - file.range.start + 1;
+    } else {
+      headers["Content-Length"] = totalSize;
+    }
+
     if (!isPassiveMedia) {
       headers["Content-Security-Policy"] = "sandbox";
     }
 
     res.set(headers);
 
-    if (isDownload) {
+    if (isDownload && !file.range) {
       void this.fileService.notifyRecipientDownload(
         shareId,
         file.metaData.name,
@@ -262,7 +291,7 @@ export class FileController {
 
   @Delete(":fileId")
   @SkipThrottle()
-  @UseGuards(StrictShareOwnerGuard)
+  @UseGuards(IdValidation, CreateShareGuard, StrictShareOwnerGuard)
   async remove(
     @Param("fileId") fileId: string,
     @Param("shareId") shareId: string,

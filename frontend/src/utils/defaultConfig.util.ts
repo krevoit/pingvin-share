@@ -15,10 +15,22 @@ export function getDefaultConfig(): Config[] {
       type: "boolean",
     },
     {
+      key: "general.showAuthButtons",
+      value: "true",
+      defaultValue: "true",
+      type: "boolean",
+    },
+    {
       key: "general.defaultLanguage",
       value: "en-US",
       defaultValue: "en-US",
       type: "string",
+    },
+    {
+      key: "share.enableUserRecipients",
+      value: "false",
+      defaultValue: "false",
+      type: "boolean",
     },
     {
       key: "security.allowRegistration",

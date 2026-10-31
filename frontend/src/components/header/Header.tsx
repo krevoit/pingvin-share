@@ -21,6 +21,7 @@ import useUser from "../../hooks/user.hook";
 import useTranslate from "../../hooks/useTranslate.hook";
 import authService from "../../services/auth.service";
 import Logo from "../Logo";
+import useHomeHref from "../../hooks/homeHref.hook";
 import ActionAvatar from "./ActionAvatar";
 import NavbarShareMenu from "./NavbarShareMenu";
 
@@ -142,7 +143,15 @@ const Header = () => {
   const { user } = useUser();
   const router = useRouter();
   const config = useConfig();
+  const homeHref = useHomeHref();
   const t = useTranslate();
+
+  const isShareOrUploadPage = [
+    "/upload/[reverseShareToken]",
+    "/share/[shareId]",
+  ].includes(router.pathname);
+  const showAuthButtons = config.get("general.showAuthButtons");
+  const shouldHideAuthButtons = !showAuthButtons && isShareOrUploadPage;
 
   const [opened, { toggle, close }] = useDisclosure(false);
   const [currentRoute, setCurrentRoute] = useState("");
@@ -155,10 +164,14 @@ const Header = () => {
   }, [close, router.pathname]);
 
   const authenticatedLinks: NavLink[] = [
-    {
-      link: "/upload",
-      label: t("navbar.upload"),
-    },
+    ...(user?.allowShare !== false
+      ? [
+          {
+            link: "/upload",
+            label: t("navbar.upload"),
+          },
+        ]
+      : []),
     {
       component: <NavbarShareMenu />,
     },
@@ -167,12 +180,14 @@ const Header = () => {
     },
   ];
 
-  let unauthenticatedLinks: NavLink[] = [
-    {
+  let unauthenticatedLinks: NavLink[] = [];
+
+  if (!shouldHideAuthButtons) {
+    unauthenticatedLinks.push({
       link: "/auth/signIn",
       label: t("navbar.signin"),
-    },
-  ];
+    });
+  }
 
   if (config.get("security.allowUnauthenticatedShares")) {
     unauthenticatedLinks.unshift({
@@ -187,18 +202,23 @@ const Header = () => {
       label: t("navbar.home"),
     });
 
-  if (config.get("security.allowRegistration"))
+  if (config.get("security.allowRegistration") && !shouldHideAuthButtons) {
     unauthenticatedLinks.push({
       link: "/auth/signUp",
       label: t("navbar.signup"),
     });
+  }
 
   const mobileRootLinks: NavLink[] = user
     ? [
-        {
-          link: "/upload",
-          label: t("navbar.upload"),
-        },
+        ...(user.allowShare !== false
+          ? [
+              {
+                link: "/upload",
+                label: t("navbar.upload"),
+              },
+            ]
+          : []),
         {
           label: t("common.button.shares"),
         },
@@ -340,7 +360,7 @@ const Header = () => {
     <>
       <MantineHeader height={HEADER_HEIGHT} mb={0} className={classes.root}>
         <Container className={classes.header}>
-          <Link href="/" passHref>
+          <Link href={homeHref} passHref>
             <Group>
               <Logo height={35} width={35} />
               <Text weight={600}>{config.get("general.appName")}</Text>

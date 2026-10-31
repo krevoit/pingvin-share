@@ -1,10 +1,13 @@
 import { Expose, plainToClass } from "class-transformer";
 import {
+  IsString,
+  IsBoolean,
   IsEmail,
+  IsInt,
   IsOptional,
   Length,
   Matches,
-  MinLength,
+  Min,
 } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
@@ -24,9 +27,16 @@ export class UserDTO {
   email: string;
 
   @Expose()
+  @IsOptional()
+  @Matches(/^[\p{L} ,.'-]*$/u, {
+    message: i18nValidationMessage("validation.namePattern"),
+  })
+  displayName?: string;
+
+  @Expose()
   hasPassword: boolean;
 
-  @MinLength(8)
+  @IsString()
   password: string;
 
   @Expose()
@@ -53,6 +63,28 @@ export class UserDTO {
     message: "storageQuotaLimit must be greater than 0",
   })
   storageQuotaLimit?: string;
+
+  @Expose()
+  @IsOptional()
+  @IsBoolean()
+  allowShare: boolean;
+
+  @Expose()
+  @IsOptional()
+  @IsBoolean()
+  allowCreateReverseShares: boolean;
+
+  @Expose()
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  maxShares?: number;
+
+  @Expose()
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  maxReverseShares?: number;
 
   @Expose()
   totpVerified: boolean;

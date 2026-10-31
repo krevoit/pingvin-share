@@ -1,5 +1,6 @@
 type User = {
   id: string;
+  displayName?: string | null;
   username: string;
   email: string;
   isAdmin: boolean;
@@ -9,18 +10,28 @@ type User = {
   hasPassword: boolean;
   shareSizeLimit?: string;
   storageQuotaLimit?: string;
+  allowShare?: boolean;
+  allowCreateReverseShares?: boolean;
+  maxShares?: number | null;
+  maxReverseShares?: number | null;
 };
 
 export type CreateUser = {
+  displayName?: string | null;
   username: string;
   email: string;
   password?: string;
   isAdmin?: boolean;
   shareSizeLimit?: string | null;
   storageQuotaLimit?: string | null;
+  allowShare?: boolean;
+  allowCreateReverseShares?: boolean;
+  maxShares?: number | null;
+  maxReverseShares?: number | null;
 };
 
 export type UpdateUser = {
+  displayName?: string | null;
   username?: string;
   email?: string;
   password?: string;
@@ -28,11 +39,15 @@ export type UpdateUser = {
   isActivated?: boolean;
   shareSizeLimit?: string | null;
   storageQuotaLimit?: string | null;
+  allowShare?: boolean;
+  allowCreateReverseShares?: boolean;
+  maxShares?: number | null;
+  maxReverseShares?: number | null;
 };
 
 export type UpdateCurrentUser = {
+  displayName?: string | null;
   username?: string;
-  email?: string;
 };
 
 export type CurrentUser = User & {};

@@ -1,4 +1,4 @@
-import { getCookie } from "cookies-next";
+import { getCookie } from "cookies-next/client";
 import * as jose from "jose";
 import api from "./api.service";
 
@@ -22,8 +22,18 @@ const signInTotp = (totp: string, loginToken: string) => {
   });
 };
 
-const signUp = async (email: string, username: string, password: string) => {
-  const response = await api.post("auth/signUp", { email, username, password });
+const signUp = async (
+  displayName: string | undefined,
+  email: string,
+  username: string,
+  password: string,
+) => {
+  const response = await api.post("auth/signUp", {
+    displayName,
+    email,
+    username,
+    password,
+  });
 
   return response;
 };
@@ -38,7 +48,7 @@ const signOut = async () => {
 
 const refreshAccessToken = async () => {
   try {
-    const accessToken = getCookie("access_token") as string;
+    const accessToken = getCookie("access_token");
 
     // If the access token expires in less than 2 minutes refresh it
     if (

@@ -215,10 +215,25 @@ export class S3FileService {
     return file;
   }
 
-  async get(shareId: string, fileId: string): Promise<File> {
-    const fileName = (
-      await this.prisma.file.findUnique({ where: { id: fileId } })
-    ).name;
+  async get(
+    shareId: string,
+    fileId: string,
+    range?: { start: number; end?: number } | string,
+  ): Promise<File> {
+    const file = await this.prisma.file.findFirst({
+      where: { id: fileId, shareId },
+    });
+
+    if (!file) throw new NotFoundException(this.i18n.t("file.notFound"));
+
+    const fileName = file.name;
+
+    let rangeString: string | undefined;
+    if (typeof range === "string") {
+      rangeString = range;
+    } else if (range && typeof range === "object") {
+      rangeString = `bytes=${range.start}-${range.end ?? ""}`;
+    }
 
     const s3Instance = this.getS3Instance();
     const key = `${this.getS3Path()}${shareId}/${fileName}`;
@@ -226,6 +241,7 @@ export class S3FileService {
       new GetObjectCommand({
         Bucket: this.config.get("s3.bucketName"),
         Key: key,
+        Range: rangeString,
       }),
     );
 
@@ -245,8 +261,8 @@ export class S3FileService {
   }
 
   async remove(shareId: string, fileId: string) {
-    const fileMetaData = await this.prisma.file.findUnique({
-      where: { id: fileId },
+    const fileMetaData = await this.prisma.file.findFirst({
+      where: { id: fileId, shareId },
     });
 
     if (!fileMetaData)
