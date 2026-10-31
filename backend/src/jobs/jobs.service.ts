@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import * as fs from "fs";
 import * as moment from "moment";
+import { CLI_TEMP_DIRECTORY } from "src/cliUpload/cliUpload.service";
 import { DirectLinkService } from "src/file/directLink.service";
 import { FileService } from "src/file/file.service";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -164,6 +165,29 @@ export class JobsService {
       await this.prisma.cliUploadToken.deleteMany({
         where: { expiresAt: { lt: moment().subtract(7, "days").toDate() } },
       });
+
+    // Temp files of CLI uploads interrupted by a crash or restart
+    let deletedTempFiles = 0;
+    try {
+      for (const name of await fs.promises.readdir(CLI_TEMP_DIRECTORY)) {
+        if (!name.startsWith("cli-")) continue;
+        const path = `${CLI_TEMP_DIRECTORY}/${name}`;
+        const stats = await fs.promises.stat(path);
+        if (moment(stats.mtime).add(1, "day").isBefore(moment())) {
+          await fs.promises.rm(path, { force: true });
+          deletedTempFiles++;
+        }
+      }
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+        this.logger.error("Failed to clean up CLI upload temp files", e);
+      }
+    }
+    if (deletedTempFiles > 0) {
+      this.logger.log(
+        `Deleted ${deletedTempFiles} stale CLI upload temp files`,
+      );
+    }
 
     if (deletedLinks + deletedTokens > 0) {
       this.logger.log(

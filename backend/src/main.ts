@@ -31,6 +31,8 @@ function generateNestJsLogLevels(): LogLevel[] {
   }
 }
 
+const DEFAULT_REQUEST_TIMEOUT_MS = 5 * 60 * 1000;
+
 async function bootstrap() {
   const logLevels = generateNestJsLogLevels();
   Logger.log(`Showing ${logLevels.join(", ")} messages`);
@@ -54,6 +56,23 @@ async function bootstrap() {
     req.path.toLowerCase().startsWith("/api/cli/upload/");
   const jsonParser = express.json();
   const urlencodedParser = express.urlencoded({ extended: true });
+
+  // Node's server-wide requestTimeout is disabled below so long CLI uploads
+  // aren't cut off; re-apply the default 5 minute limit to every other route.
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (isStreamedUpload(req)) {
+      // While the client waits for the upload to be imported (e.g. to S3) the
+      // socket is idle, so lift the idle timeout once the body is complete.
+      req.on("end", () => req.socket.setTimeout(0));
+      return next();
+    }
+    const timer = setTimeout(() => {
+      if (!req.complete) req.socket.destroy();
+    }, DEFAULT_REQUEST_TIMEOUT_MS);
+    res.on("close", () => clearTimeout(timer));
+    req.on("end", () => clearTimeout(timer));
+    next();
+  });
 
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (isStreamedUpload(req)) return next();
@@ -95,7 +114,8 @@ async function bootstrap() {
   );
 
   // Node's default 5 minute limit for receiving a whole request would cut off
-  // large streamed CLI uploads. Instead, drop connections that go idle.
+  // large streamed CLI uploads; it is re-applied per request for all other
+  // routes by the middleware above. Connections that go idle are dropped.
   server.requestTimeout = 0;
   server.setTimeout(10 * 60 * 1000);
 

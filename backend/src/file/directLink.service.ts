@@ -55,6 +55,9 @@ export class DirectLinkService {
     dto: CreateDirectLinkDTO,
   ) {
     const file = await this.getManagedFile(shareId, fileId, user);
+    if (user.allowShare === false) {
+      throw new ForbiddenException(this.i18n.t("share.notAllowedToShare"));
+    }
     if (!file.share.uploadLocked) {
       throw new BadRequestException(this.i18n.t("share.notFound"));
     }

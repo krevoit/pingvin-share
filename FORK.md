@@ -25,6 +25,9 @@ wget --content-disposition 'https://share.example.com/api/dl/<token>/file.zip'
 - Every request that returns file content counts as one download, including resumed or partial (`Range`) requests. `HEAD` requests never count.
 - A link also stops working when the share expires, is deleted, is being edited or reaches its max views. Each direct download counts as a share view.
 - Tokens are stored hashed and are shown only once. An invalid, expired, revoked or used-up link always returns the same `404`.
+- Direct links skip the share's password and recipient restriction. That is the point of them, so only create them for files you're happy to hand out.
+- Chat apps that show link previews (Slack, Teams, Discord…) fetch the URL, which uses up one download. Send one-time links over something that doesn't unfurl links, or allow 2 downloads.
+- If an admin takes away a user's permission to share, that user can no longer create links.
 
 ## CLI uploads
 
@@ -72,3 +75,5 @@ Notes:
 - A failed or aborted upload is rolled back, and the token use is given back.
 - Uploads are streamed to `DATA_DIRECTORY/uploads/_temp` before being moved to local storage or S3, so that directory needs room for the largest upload.
 - The token is part of the URL, so it can show up in reverse-proxy access logs. Prefer short-lived or one-time tokens.
+- Concurrent uploads count against the storage quota while they are in progress. The server also keeps 512 MB of the data volume free.
+- Error messages are deliberately generic ("Upload exceeds the allowed size"), so a token holder can't learn your remaining quota or the server's free disk space.

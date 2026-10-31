@@ -29,7 +29,6 @@ import {
   exceedsMaxExpiration,
   parseRelativeExpiration,
 } from "src/utils/expiration.util";
-import { byteToHumanSizeString } from "src/utils/fileSize.util";
 import { getUserActiveStorageUsage } from "src/utils/storageQuota.util";
 import {
   generateSecretToken,
@@ -46,7 +45,9 @@ const CLI_TOKEN_REGEX = /^pvu_[a-zA-Z0-9_-]{32,64}$/;
 const MAX_TOKEN_LIFETIME_DAYS = 365;
 const MAX_ACTIVE_TOKENS_PER_USER = 50;
 export const MAX_FILES_PER_UPLOAD = 100;
-const TEMP_DIRECTORY = `${DATA_DIRECTORY}/uploads/_temp`;
+export const CLI_TEMP_DIRECTORY = `${DATA_DIRECTORY}/uploads/_temp`;
+const TEMP_DIRECTORY = CLI_TEMP_DIRECTORY;
+const DISK_SAFETY_MARGIN = 512 * 1024 * 1024;
 const SHARE_ID_ALPHABET =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -75,14 +76,13 @@ export interface CliUploadResult {
 export class CliUploadSession {
   readonly files: { id: string; name: string; size: number }[] = [];
   private readonly usedNames = new Set<string>();
-  private totalBytes = 0;
 
   constructor(
     private readonly service: CliUploadService,
     readonly shareId: string,
     readonly storageProvider: string,
-    private readonly maxBytes: number,
-    private readonly limitMessage: (exceededBytes: number) => string,
+    /** Accounts for `bytes` more being written; throws when a limit is hit */
+    private readonly reserve: (bytes: number) => void,
   ) {}
 
   async addFile(rawName: string | undefined, stream: Readable) {
@@ -98,19 +98,14 @@ export class CliUploadSession {
     const tempPath = `${TEMP_DIRECTORY}/cli-${id}`;
 
     let size = 0;
-    const remaining = this.maxBytes - this.totalBytes;
     const limiter = new Transform({
       transform: (chunk: Buffer, _encoding, callback) => {
         size += chunk.length;
-        if (size > remaining) {
-          callback(
-            new HttpException(
-              this.limitMessage(size - remaining),
-              HttpStatus.PAYLOAD_TOO_LARGE,
-            ),
-          );
-        } else {
+        try {
+          this.reserve(chunk.length);
           callback(null, chunk);
+        } catch (e) {
+          callback(e as Error);
         }
       },
     });
@@ -126,7 +121,6 @@ export class CliUploadSession {
       await fs.rm(tempPath, { force: true }).catch(() => undefined);
     }
 
-    this.totalBytes += size;
     this.files.push({ id, name, size });
   }
 
@@ -146,6 +140,12 @@ export class CliUploadSession {
 @Injectable()
 export class CliUploadService {
   private readonly logger = new Logger(CliUploadService.name);
+
+  // Bytes written by uploads that are still in progress. Needed because the
+  // database only knows about a file once it has been fully written, so
+  // concurrent uploads would otherwise each see the full quota / free disk.
+  private readonly inFlightBytesByUser = new Map<string, number>();
+  private inFlightBytesTotal = 0;
 
   constructor(
     private prisma: PrismaService,
@@ -251,6 +251,7 @@ export class CliUploadService {
   }): Promise<CliUploadResult> {
     const tokenRecord = await this.reserveTokenUse(params.token, params.ip);
     let session: CliUploadSession | undefined;
+    let releaseBytes = () => undefined as void;
 
     try {
       const user = tokenRecord.creator;
@@ -258,12 +259,14 @@ export class CliUploadService {
         throw new ForbiddenException(this.i18n.t("share.notAllowedToShare"));
       }
 
-      session = await this.startSession(
+      const started = await this.startSession(
         user,
         tokenRecord.shareExpiration,
         params.options,
         params.declaredSize,
       );
+      session = started.session;
+      releaseBytes = started.release;
 
       await params.receive(session);
 
@@ -271,6 +274,15 @@ export class CliUploadService {
         throw new BadRequestException(
           this.i18n.t("share.completionRequiresFile"),
         );
+      }
+
+      // Authoritative re-check now that this upload's files are in the DB
+      if (
+        user.storageQuotaLimit &&
+        (await getUserActiveStorageUsage(this.prisma, user.id)) >
+          parseInt(user.storageQuotaLimit)
+      ) {
+        throw this.tooLarge();
       }
 
       const share = await this.shareService.complete(session.shareId);
@@ -313,7 +325,18 @@ export class CliUploadService {
         data: { useCount: { decrement: 1 } },
       });
       throw e;
+    } finally {
+      releaseBytes();
     }
+  }
+
+  private tooLarge() {
+    // Deliberately generic: token holders shouldn't learn the owner's
+    // remaining quota or the server's free disk space.
+    return new HttpException(
+      "Upload exceeds the allowed size",
+      HttpStatus.PAYLOAD_TOO_LARGE,
+    );
   }
 
   /** Called by CliUploadSession once a file has been fully written to disk. */
@@ -330,6 +353,11 @@ export class CliUploadService {
       tempPath,
       size,
     );
+    // Keep the share from being reaped as "unfinished" during long uploads
+    await this.prisma.share.update({
+      where: { id: session.shareId },
+      data: { updatedAt: new Date() },
+    });
   }
 
   /**
@@ -380,38 +408,59 @@ export class CliUploadService {
     const maxShareSize = parseInt(
       user.shareSizeLimit ?? this.config.get("share.maxSize"),
     );
-    let maxBytes = maxShareSize;
-    let limitMessage = (_exceeded: number) =>
-      this.i18n.t("file.maxSizeExceeded");
+    const quotaLimit = user.storageQuotaLimit
+      ? parseInt(user.storageQuotaLimit)
+      : null;
+    const usageAtStart =
+      quotaLimit !== null
+        ? await getUserActiveStorageUsage(this.prisma, user.id)
+        : 0;
 
-    if (user.storageQuotaLimit) {
-      const quotaLeft =
-        parseInt(user.storageQuotaLimit) -
-        (await getUserActiveStorageUsage(this.prisma, user.id));
-      if (quotaLeft < maxBytes) {
-        maxBytes = Math.max(0, quotaLeft);
-        limitMessage = (exceeded: number) =>
-          this.i18n.t("file.storageQuotaExceeded", {
-            args: { exceededSize: byteToHumanSizeString(exceeded) },
-          });
-      }
-    }
-
-    // The upload is buffered in the data directory before it is moved to its
-    // final location, so never accept more than the disk can hold.
+    // Uploads are buffered in the data directory before being moved to their
+    // final location, so leave a safety margin for the database and others.
     const disk = await fs.statfs(TEMP_DIRECTORY);
-    const freeBytes = disk.bavail * disk.bsize;
-    if (freeBytes < maxBytes) {
-      maxBytes = freeBytes;
-      limitMessage = () => this.i18n.t("file.notEnoughSpace");
-    }
+    const freeAtStart = disk.bavail * disk.bsize;
+    const totalAtStart = this.inFlightBytesTotal;
 
-    if (declaredSize !== undefined && declaredSize > maxBytes) {
-      throw new HttpException(
-        limitMessage(declaredSize - maxBytes),
-        HttpStatus.PAYLOAD_TOO_LARGE,
-      );
+    const fits = (sessionBytes: number) =>
+      sessionBytes <= maxShareSize &&
+      (quotaLimit === null ||
+        usageAtStart + (this.inFlightBytesByUser.get(user.id) ?? 0) <=
+          quotaLimit) &&
+      freeAtStart - (this.inFlightBytesTotal - totalAtStart) >=
+        DISK_SAFETY_MARGIN;
+
+    if (
+      declaredSize !== undefined &&
+      (declaredSize > maxShareSize ||
+        (quotaLimit !== null &&
+          usageAtStart +
+            (this.inFlightBytesByUser.get(user.id) ?? 0) +
+            declaredSize >
+            quotaLimit) ||
+        freeAtStart - declaredSize < DISK_SAFETY_MARGIN)
+    ) {
+      throw this.tooLarge();
     }
+    if (!fits(0)) throw this.tooLarge();
+
+    let sessionBytes = 0;
+    const reserve = (bytes: number) => {
+      sessionBytes += bytes;
+      this.inFlightBytesTotal += bytes;
+      this.inFlightBytesByUser.set(
+        user.id,
+        (this.inFlightBytesByUser.get(user.id) ?? 0) + bytes,
+      );
+      if (!fits(sessionBytes)) throw this.tooLarge();
+    };
+    const release = () => {
+      this.inFlightBytesTotal -= sessionBytes;
+      const left = (this.inFlightBytesByUser.get(user.id) ?? 0) - sessionBytes;
+      if (left > 0) this.inFlightBytesByUser.set(user.id, left);
+      else this.inFlightBytesByUser.delete(user.id);
+      sessionBytes = 0;
+    };
 
     const shareDto = {
       id: await this.generateShareId(),
@@ -423,15 +472,23 @@ export class CliUploadService {
       size: declaredSize,
     } as CreateShareDTO;
 
-    const share = await this.shareService.create(shareDto, user);
+    let share: Awaited<ReturnType<ShareService["create"]>>;
+    try {
+      share = await this.shareService.create(shareDto, user);
+    } catch (e) {
+      release();
+      throw e;
+    }
 
-    return new CliUploadSession(
-      this,
-      share.id,
-      share.storageProvider,
-      maxBytes,
-      limitMessage,
-    );
+    return {
+      session: new CliUploadSession(
+        this,
+        share.id,
+        share.storageProvider,
+        reserve,
+      ),
+      release,
+    };
   }
 
   private async discardShare(shareId: string) {

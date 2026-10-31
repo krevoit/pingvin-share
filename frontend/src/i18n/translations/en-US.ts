@@ -73,8 +73,7 @@ export default {
 
   // /auth/verify
   "verify.title": "Verify Account",
-  "verify.success":
-    "Your account has been verified. You can now sign in.",
+  "verify.success": "Your account has been verified. You can now sign in.",
   "verify.error": "The verification link is invalid or has expired.",
   "verify.button.signin": "Go to Sign In",
   "verify.info.title": "Account Verification",
@@ -545,7 +544,8 @@ export default {
   "admin.config.general.app-name": "App name",
   "admin.config.general.app-name.description": "Name of the application",
   "admin.config.general.show-auth-buttons": "Show auth buttons",
-  "admin.config.general.show-auth-buttons.description": "Whether to show sign-in and sign-up buttons on share and upload pages.",
+  "admin.config.general.show-auth-buttons.description":
+    "Whether to show sign-in and sign-up buttons on share and upload pages.",
   "admin.config.general.default-language": "Default Language",
   "admin.config.general.default-language.description":
     "This applies to all users. Each user can still choose a language in their profile.",
@@ -745,8 +745,7 @@ export default {
   "admin.config.smtp.port": "Port",
   "admin.config.smtp.port.description": "Port of the SMTP server",
   "admin.config.smtp.email": "Email",
-  "admin.config.smtp.email.description":
-    "Email address used to send messages.",
+  "admin.config.smtp.email.description": "Email address used to send messages.",
   "admin.config.smtp.username": "Username",
   "admin.config.smtp.username.description": "Username of the SMTP server",
   "admin.config.smtp.password": "Password",
@@ -884,7 +883,8 @@ export default {
   "admin.config.ldap.field-name-email": "User email attribute name",
   "admin.config.ldap.field-name-email.description":
     "LDAP attribute name for the email of an user.",
-  "admin.config.ldap.field-name-display-name": "User display name attribute name",
+  "admin.config.ldap.field-name-display-name":
+    "User display name attribute name",
   "admin.config.ldap.field-name-display-name.description":
     "LDAP attribute name for the display name of an user.",
   "admin.config.notify.success": "Configuration updated successfully.",
@@ -1033,7 +1033,7 @@ export default {
   "share.direct-links.button": "Direct download links",
   "share.direct-links.title": "Direct download links: {name}",
   "share.direct-links.description":
-    "Direct links download the file without the share page, password or sign-in, which is handy for curl/wget on a server or a console you don't trust. Every link can be limited by time and download count and revoked instantly.",
+    "Direct links download the file without the share page, password, recipient restriction or sign-in, which is handy for curl/wget on a server or a console you don't trust. Every link can be limited by time and download count and revoked instantly. Pasting a link into a chat app may let its link preview use up a download.",
   "share.direct-links.created.title": "Link created",
   "share.direct-links.created.once":
     "Copy it now. For security the link is only shown once and can't be retrieved later.",
@@ -1047,7 +1047,8 @@ export default {
     "Every request that returns file content counts as a download, including resumed or partial (range) downloads. The link also stops working when the share expires, is deleted or reaches its view limit.",
   "share.direct-links.create.submit": "Create link",
   "share.direct-links.list.title": "Links",
-  "share.direct-links.list.empty": "No direct links have been created for this file.",
+  "share.direct-links.list.empty":
+    "No direct links have been created for this file.",
   "share.direct-links.revoke": "Revoke",
   "share.direct-links.revoke-all": "Revoke all",
   "share.direct-links.notify.revoked": "Link revoked",

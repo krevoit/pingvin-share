@@ -79,7 +79,15 @@ const statusColor: Record<string, string> = {
 };
 
 const shellQuote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`;
-const powershellQuote = (value: string) => `'${value.replace(/'/g, "''")}'`;
+// PowerShell treats the typographic quotes ‘ ’ ‚ ‛ like ' inside single-quoted
+// strings, so all of them must be doubled to stay inside the string.
+const powershellQuote = (value: string) =>
+  `'${value.replace(/['\u2018\u2019\u201a\u201b]/g, "$&$&")}'`;
+
+// File name for -OutFile: plain ASCII only, nothing a shell could interpret.
+const safeOutFileName = (name: string) =>
+  (name.split("/").pop() ?? name).replace(/[^\w.\- ]/g, "_").trim() ||
+  "download";
 
 const Body = ({
   shareId,
@@ -203,7 +211,7 @@ const Body = ({
               PowerShell
             </Text>
             <CopyableCommand
-              value={`Invoke-WebRequest -Uri ${powershellQuote(createdUrl)} -OutFile ${powershellQuote(file.name.split("/").pop() ?? file.name)}`}
+              value={`Invoke-WebRequest -Uri ${powershellQuote(createdUrl)} -OutFile ${powershellQuote(safeOutFileName(file.name))}`}
             />
           </Stack>
         </Alert>
