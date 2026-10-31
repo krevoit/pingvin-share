@@ -133,25 +133,6 @@ const removeFile = async (shareId: string, fileId: string) => {
   await api.delete(`shares/${shareId}/files/${fileId}`);
 };
 
-const createDirectDownloadLink = async (
-  shareId: string,
-  fileId: string,
-): Promise<{
-  token: string;
-  expiresAt: Date;
-  revokedAt?: Date;
-  lastUsedAt?: Date;
-}> => {
-  if (!isValidId(shareId)) throw new Error("Invalid Share ID");
-  return (await api.post(`shares/${shareId}/files/${fileId}/direct-link`))
-    .data;
-};
-
-const revokeDirectDownloadLink = async (shareId: string, fileId: string) => {
-  if (!isValidId(shareId)) throw new Error("Invalid Share ID");
-  await api.delete(`shares/${shareId}/files/${fileId}/direct-link`);
-};
-
 interface S3UploadSession {
   uploadId: string;
   urls: string[];
@@ -448,8 +429,6 @@ export default {
   isReverseShareTokenAvailable,
   downloadFile,
   removeFile,
-  createDirectDownloadLink,
-  revokeDirectDownloadLink,
   uploadFile,
   setReverseShare,
   createReverseShare,

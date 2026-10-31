@@ -1,8 +1,22 @@
 import { setCookie } from "cookies-next/client";
 import { LOCALES } from "../i18n/locales";
 
+const localeCache = new Map<string, (typeof LOCALES)[keyof typeof LOCALES]>();
+
 const getLocaleByCode = (code: string) => {
-  return Object.values(LOCALES).find((l) => l.code === code) ?? LOCALES.ENGLISH;
+  const locale =
+    Object.values(LOCALES).find((l) => l.code === code) ?? LOCALES.ENGLISH;
+  // Fall back to English for strings that haven't been translated yet.
+  // Cached so the messages object keeps a stable identity between renders.
+  let merged = localeCache.get(locale.code);
+  if (!merged) {
+    merged = {
+      ...locale,
+      messages: { ...LOCALES.ENGLISH.messages, ...locale.messages },
+    };
+    localeCache.set(locale.code, merged);
+  }
+  return merged;
 };
 
 // Parse the Accept-Language header and return the first supported language

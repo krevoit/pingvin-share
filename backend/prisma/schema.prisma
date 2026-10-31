@@ -31,6 +31,7 @@ model User {
   reverseShares       ReverseShare[]
   shareUserRecipients ShareUserRecipient[]
   adminNoticeDismissals AdminNoticeDismissal[]
+  cliUploadTokens     CliUploadToken[]
 
   totpEnabled        Boolean             @default(false)
   totpVerified       Boolean             @default(false)
@@ -149,7 +150,7 @@ model File {
   shareId String
   share   Share  @relation(fields: [shareId], references: [id], onDelete: Cascade)
 
-  directDownloadLink DirectDownloadLink?
+  directDownloadLinks DirectDownloadLink[]
 }
 
 model DirectDownloadLink {
@@ -157,13 +158,38 @@ model DirectDownloadLink {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tokenHash  String    @unique
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  lastUsedAt DateTime?
+  name          String?
+  tokenHash     String    @unique
+  expiresAt     DateTime?
+  maxDownloads  Int?
+  downloadCount Int       @default(0)
+  revokedAt     DateTime?
+  lastUsedAt    DateTime?
+  lastUsedIp    String?
 
-  fileId String @unique
+  fileId String
   file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+}
+
+model CliUploadToken {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  name            String?
+  tokenHash       String    @unique
+  expiresAt       DateTime
+  maxUses         Int?
+  useCount        Int       @default(0)
+  shareExpiration String
+  lastUsedAt      DateTime?
+  lastUsedIp      String?
+
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId])
 }
 
 model ShareSecurity {

@@ -168,15 +168,6 @@ const Share = ({ shareId }: { shareId: string }) => {
     getFiles();
   }, []);
 
-  useEffect(() => {
-    if (!isOwner) return;
-
-    shareService
-      .getFromOwner(shareId)
-      .then((ownerShare) => setShare(ownerShare))
-      .catch(() => undefined);
-  }, [isOwner]);
-
   if (isRestricted) {
     return (
       <Center style={{ height: "70vh" }}>

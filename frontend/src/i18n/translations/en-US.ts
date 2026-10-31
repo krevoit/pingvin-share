@@ -8,6 +8,7 @@ export default {
   "navbar.links.shares": "My shares",
   "navbar.links.reverse": "Reverse shares",
   "navbar.links.received": "Received shares",
+  "navbar.links.cli-uploads": "CLI uploads",
 
   "navbar.avatar.account": "My account",
   "navbar.avatar.admin": "Administration",
@@ -1027,4 +1028,84 @@ export default {
   "admin.notice.modal.docsLink": "View Documentation",
   "admin.notice.modal.globalNoticeFooter":
     "Note: Once acknowledged, this notice will be permanently dismissed for all administrators across all devices.",
+
+  // Direct download links
+  "share.direct-links.button": "Direct download links",
+  "share.direct-links.title": "Direct download links: {name}",
+  "share.direct-links.description":
+    "Direct links download the file without the share page, password or sign-in, which is handy for curl/wget on a server or a console you don't trust. Every link can be limited by time and download count and revoked instantly.",
+  "share.direct-links.created.title": "Link created",
+  "share.direct-links.created.once":
+    "Copy it now. For security the link is only shown once and can't be retrieved later.",
+  "share.direct-links.create.title": "New link",
+  "share.direct-links.create.name": "Label (optional)",
+  "share.direct-links.create.name.placeholder": "e.g. build server",
+  "share.direct-links.create.expires-after": "Expires after",
+  "share.direct-links.create.max-downloads": "Max downloads",
+  "share.direct-links.create.never-expires": "No time limit",
+  "share.direct-links.create.hint":
+    "Every request that returns file content counts as a download, including resumed or partial (range) downloads. The link also stops working when the share expires, is deleted or reaches its view limit.",
+  "share.direct-links.create.submit": "Create link",
+  "share.direct-links.list.title": "Links",
+  "share.direct-links.list.empty": "No direct links have been created for this file.",
+  "share.direct-links.revoke": "Revoke",
+  "share.direct-links.revoke-all": "Revoke all",
+  "share.direct-links.notify.revoked": "Link revoked",
+  "share.direct-links.notify.revoked-all": "All links revoked",
+  "share.direct-links.unlimited": "Unlimited",
+  "share.direct-links.never": "Never",
+  "share.direct-links.table.name": "Label",
+  "share.direct-links.table.status": "Status",
+  "share.direct-links.table.downloads": "Downloads",
+  "share.direct-links.table.expires": "Expires",
+  "share.direct-links.table.last-used": "Last used",
+  "share.direct-links.status.active": "Active",
+  "share.direct-links.status.revoked": "Revoked",
+  "share.direct-links.status.expired": "Expired",
+  "share.direct-links.status.used-up": "Used up",
+  // END Direct download links
+
+  // /account/cliUploads
+  "account.cli-uploads.title": "CLI uploads",
+  "account.cli-uploads.description":
+    "Upload tokens let you create shares from a terminal with curl, without signing in there. Shares are created in your account.",
+  "account.cli-uploads.empty.title": "No upload tokens yet",
+  "account.cli-uploads.empty.description":
+    "Create a token to upload files from a terminal, e.g. curl -T file.zip <url>.",
+  "account.cli-uploads.not-allowed":
+    "You do not have permission to create shares.",
+  "account.cli-uploads.modal.title": "Create upload token",
+  "account.cli-uploads.modal.name": "Label (optional)",
+  "account.cli-uploads.modal.name.placeholder": "e.g. lab console",
+  "account.cli-uploads.modal.valid-for": "Token valid for",
+  "account.cli-uploads.modal.valid-for.description":
+    "The token stops working after this time (max. 1 year).",
+  "account.cli-uploads.modal.max-uses": "Uploads allowed",
+  "account.cli-uploads.modal.max-uses.description":
+    "How many uploads the token can be used for. 1 = one-time token, 0 = unlimited until it expires.",
+  "account.cli-uploads.modal.share-expiration": "Shares expire after",
+  "account.cli-uploads.modal.share-expiration.max": "Maximum: {max}",
+  "account.cli-uploads.modal.share-never": "Shares never expire",
+  "account.cli-uploads.created.title": "Token created",
+  "account.cli-uploads.created.once":
+    "Copy a command now. For security the token is only shown once. The command prints the share URL when the upload is done.",
+  "account.cli-uploads.example.single": "Upload a file",
+  "account.cli-uploads.example.multiple": "Upload several files into one share",
+  "account.cli-uploads.example.pipe": "Upload from stdin",
+  "account.cli-uploads.example.direct-link":
+    "Also print a one-time direct download link",
+  "account.cli-uploads.delete.title": "Revoke upload token",
+  "account.cli-uploads.delete.description":
+    "The token stops working immediately. Shares already uploaded with it are not affected.",
+  "account.cli-uploads.revoke": "Revoke",
+  "account.cli-uploads.table.name": "Label",
+  "account.cli-uploads.table.status": "Status",
+  "account.cli-uploads.table.uses": "Uses",
+  "account.cli-uploads.table.expires": "Token expires",
+  "account.cli-uploads.table.share-expiration": "Share lifetime",
+  "account.cli-uploads.table.last-used": "Last used",
+  "account.cli-uploads.status.active": "Active",
+  "account.cli-uploads.status.expired": "Expired",
+  "account.cli-uploads.status.used-up": "Used up",
+  // END /account/cliUploads
 };

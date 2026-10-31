@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import * as fs from "fs";
 import * as moment from "moment";
+import { DirectLinkService } from "src/file/directLink.service";
 import { FileService } from "src/file/file.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { ReverseShareService } from "src/reverseShare/reverseShare.service";
@@ -17,6 +18,7 @@ export class JobsService {
     private reverseShareService: ReverseShareService,
     private fileService: FileService,
     private configServer: ConfigService,
+    private directLinkService: DirectLinkService,
   ) {}
 
   @Cron("* * * * *")
@@ -152,6 +154,21 @@ export class JobsService {
 
     if (deletedTokensCount > 0) {
       this.logger.log(`Deleted ${deletedTokensCount} expired refresh tokens`);
+    }
+  }
+
+  @Cron("20 * * * *")
+  async deleteStaleDirectLinksAndCliTokens() {
+    const deletedLinks = await this.directLinkService.deleteStale();
+    const { count: deletedTokens } =
+      await this.prisma.cliUploadToken.deleteMany({
+        where: { expiresAt: { lt: moment().subtract(7, "days").toDate() } },
+      });
+
+    if (deletedLinks + deletedTokens > 0) {
+      this.logger.log(
+        `Deleted ${deletedLinks} stale direct links and ${deletedTokens} expired CLI upload tokens`,
+      );
     }
   }
 

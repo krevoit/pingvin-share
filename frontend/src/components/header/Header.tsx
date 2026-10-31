@@ -237,6 +237,10 @@ const Header = () => {
       link: "/account/reverseShares",
       label: t("navbar.links.reverse"),
     },
+    {
+      link: "/account/cliUploads",
+      label: t("navbar.links.cli-uploads"),
+    },
     ...(config.get("share.enableUserRecipients")
       ? [
           {

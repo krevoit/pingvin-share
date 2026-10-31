@@ -467,43 +467,6 @@ export class ShareService {
     };
   }
 
-  async getFromOwner(id: string): Promise<any> {
-    const share = await this.prisma.share.findUnique({
-      where: { id },
-      include: {
-        files: {
-          orderBy: {
-            name: "asc",
-          },
-          include: {
-            directDownloadLink: {
-              select: {
-                expiresAt: true,
-                revokedAt: true,
-                lastUsedAt: true,
-              },
-            },
-          },
-        },
-        creator: true,
-        security: true,
-      },
-    });
-
-    if (!share) throw new NotFoundException(this.i18n.t("share.notFound"));
-
-    if (share.removedReason)
-      throw new NotFoundException(share.removedReason, "share_removed");
-
-    if (!share.uploadLocked)
-      throw new NotFoundException(this.i18n.t("share.notFound"));
-
-    return {
-      ...share,
-      hasPassword: !!share.security?.password,
-    };
-  }
-
   async getMetaData(id: string) {
     const share = await this.prisma.share.findUnique({
       where: { id },

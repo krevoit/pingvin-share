@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 
 import { ScheduleModule } from "@nestjs/schedule";
 import { AuthModule } from "./auth/auth.module";
+import { CliUploadModule } from "./cliUpload/cliUpload.module";
 
 import { existsSync } from "fs";
 import { join } from "path";
@@ -36,6 +37,7 @@ const i18nPath = existsSync(join(__dirname, "../i18n"))
     AuthModule,
     ShareModule,
     FileModule,
+    CliUploadModule,
     EmailModule,
     PrismaModule,
     JobsModule,

@@ -4,6 +4,7 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import * as bodyParser from "body-parser";
 import * as cookieParser from "cookie-parser";
+import * as express from "express";
 import { NextFunction, Request, Response } from "express";
 import * as fs from "fs";
 import { I18nValidationExceptionFilter, I18nValidationPipe } from "nestjs-i18n";
@@ -36,6 +37,9 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: logLevels,
+    // Body parsers are registered manually below, after the middleware that
+    // lets streamed CLI uploads bypass them.
+    bodyParser: false,
   });
 
   app.useGlobalPipes(new I18nValidationPipe({ whitelist: true }));
@@ -44,13 +48,28 @@ async function bootstrap() {
 
   const config = app.get<ConfigService>(ConfigService);
 
+  // CLI uploads stream the request body straight to disk, so no body parser
+  // may consume it.
+  const isStreamedUpload = (req: Request) =>
+    req.path.toLowerCase().startsWith("/api/cli/upload/");
+  const jsonParser = express.json();
+  const urlencodedParser = express.urlencoded({ extended: true });
+
   app.use((req: Request, res: Response, next: NextFunction) => {
+    if (isStreamedUpload(req)) return next();
+
     const chunkSize = config.get("share.chunkSize");
     bodyParser.raw({
       type: "application/octet-stream",
       limit: `${chunkSize}B`,
     })(req, res, next);
   });
+  app.use((req: Request, res: Response, next: NextFunction) =>
+    isStreamedUpload(req) ? next() : jsonParser(req, res, next),
+  );
+  app.use((req: Request, res: Response, next: NextFunction) =>
+    isStreamedUpload(req) ? next() : urlencodedParser(req, res, next),
+  );
 
   app.use(cookieParser());
   app.set("trust proxy", process.env.TRUST_PROXY === "true");
@@ -71,9 +90,14 @@ async function bootstrap() {
     SwaggerModule.setup("api/swagger", app, document);
   }
 
-  await app.listen(
+  const server = await app.listen(
     parseInt(process.env.BACKEND_PORT || process.env.PORT || "8080"),
   );
+
+  // Node's default 5 minute limit for receiving a whole request would cut off
+  // large streamed CLI uploads. Instead, drop connections that go idle.
+  server.requestTimeout = 0;
+  server.setTimeout(10 * 60 * 1000);
 
   const logger = new Logger("UnhandledAsyncError");
   process.on("unhandledRejection", (e) => logger.error(e));

@@ -1,6 +1,11 @@
 import { ActionIcon, Menu } from "@mantine/core";
 import Link from "next/link";
-import { TbArrowLoopLeft, TbLink, TbMailbox } from "react-icons/tb";
+import {
+  TbArrowLoopLeft,
+  TbLink,
+  TbMailbox,
+  TbTerminal2,
+} from "react-icons/tb";
 import { FormattedMessage } from "react-intl";
 import { HoverTip } from "../../components/core/HoverTip";
 import useConfig from "../../hooks/config.hook";
@@ -33,6 +38,13 @@ const NavbarShareMneu = () => {
           icon={<TbArrowLoopLeft />}
         >
           <FormattedMessage id="navbar.links.reverse" />
+        </Menu.Item>
+        <Menu.Item
+          component={Link}
+          href="/account/cliUploads"
+          icon={<TbTerminal2 />}
+        >
+          <FormattedMessage id="navbar.links.cli-uploads" />
         </Menu.Item>
         {config.get("share.enableUserRecipients") && (
           <Menu.Item

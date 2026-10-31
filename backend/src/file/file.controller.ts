@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -21,12 +20,14 @@ import { GetUser } from "src/auth/decorator/getUser.decorator";
 import { CreateShareGuard } from "src/share/guard/createShare.guard";
 import { StrictShareOwnerGuard } from "src/share/guard/strictShareOwner.guard";
 import { IdValidation } from "src/share/guard/shareIdValidation.guard";
+import { ShareOwnerGuard } from "src/share/guard/shareOwner.guard";
+import { DirectLinkService } from "./directLink.service";
+import { CreateDirectLinkDTO } from "./dto/directLink.dto";
 import { FileService } from "./file.service";
 import { FileSecurityGuard } from "./guard/fileSecurity.guard";
 import * as mime from "mime-types";
 
 const VALID_ID_REGEX = /^[a-zA-Z0-9-]*={0,2}$/;
-const VALID_DIRECT_DOWNLOAD_TOKEN_REGEX = /^[a-zA-Z0-9_-]+$/;
 
 function getValidRecipientId(recipientId?: string): string | undefined {
   if (!recipientId) return undefined;
@@ -35,7 +36,10 @@ function getValidRecipientId(recipientId?: string): string | undefined {
 
 @Controller("shares/:shareId/files")
 export class FileController {
-  constructor(private fileService: FileService) {}
+  constructor(
+    private fileService: FileService,
+    private directLinkService: DirectLinkService,
+  ) {}
 
   @Post("upload-init")
   @SkipThrottle()
@@ -239,54 +243,62 @@ export class FileController {
     return new StreamableFile(file.file);
   }
 
-  @Post(":fileId/direct-link")
-  @UseGuards(IdValidation, StrictShareOwnerGuard)
-  async createDirectDownloadLink(
+  @Get(":fileId/direct-links")
+  @UseGuards(IdValidation, ShareOwnerGuard)
+  async listDirectLinks(
     @Param("shareId") shareId: string,
     @Param("fileId") fileId: string,
     @GetUser() user: User,
   ) {
-    return this.fileService.createDirectDownloadLink(shareId, fileId, user);
+    return this.directLinkService.list(shareId, fileId, user);
   }
 
-  @Delete(":fileId/direct-link")
-  @UseGuards(IdValidation, StrictShareOwnerGuard)
-  async revokeDirectDownloadLink(
+  @Post(":fileId/direct-links")
+  @UseGuards(IdValidation, ShareOwnerGuard)
+  async createDirectLink(
+    @Param("shareId") shareId: string,
+    @Param("fileId") fileId: string,
+    @GetUser() user: User,
+    @Body() body: CreateDirectLinkDTO,
+  ) {
+    return this.directLinkService.create(shareId, fileId, user, body);
+  }
+
+  @Delete(":fileId/direct-links")
+  @UseGuards(IdValidation, ShareOwnerGuard)
+  async revokeAllDirectLinks(
     @Param("shareId") shareId: string,
     @Param("fileId") fileId: string,
     @GetUser() user: User,
   ) {
-    await this.fileService.revokeDirectDownloadLink(shareId, fileId, user);
+    return this.directLinkService.revokeAll(shareId, fileId, user);
   }
 
+  @Delete(":fileId/direct-links/:linkId")
+  @UseGuards(IdValidation, ShareOwnerGuard)
+  async revokeDirectLink(
+    @Param("shareId") shareId: string,
+    @Param("fileId") fileId: string,
+    @Param("linkId") linkId: string,
+    @GetUser() user: User,
+  ) {
+    await this.directLinkService.revoke(shareId, fileId, linkId, user);
+  }
+
+  // Legacy direct download URL format, kept so links handed out before the
+  // short /api/dl/:token format keep working until they expire.
   @Get(":fileId/direct/:token")
   async getDirectDownload(
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
     @Param("shareId") shareId: string,
     @Param("fileId") fileId: string,
     @Param("token") token: string,
   ) {
-    if (!VALID_DIRECT_DOWNLOAD_TOKEN_REGEX.test(token)) {
-      throw new BadRequestException("Invalid direct download token format");
-    }
-
-    const file = await this.fileService.getDirectDownload(
+    return this.directLinkService.serveDownload(req, res, token, {
       shareId,
       fileId,
-      token,
-    );
-
-    res.set({
-      "Content-Type":
-        mime?.lookup?.(file.metaData.name) || "application/octet-stream",
-      "Content-Length": file.metaData.size,
-      "Content-Security-Policy": "sandbox",
-      "Content-Disposition": contentDisposition(file.metaData.name),
-      "Cache-Control": "no-store",
-      Pragma: "no-cache",
     });
-
-    return new StreamableFile(file.file);
   }
 
   @Delete(":fileId")
